@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎻 Violin Star Coach</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Roboto,sans-serif;background:#F0EEFF;min-height:100vh;overflow-x:hidden;}
+button{cursor:pointer;border:none;outline:none;font-family:inherit;}
+input{outline:none;font-family:inherit;}
+.hidden{display:none!important;}
+
+/* SETUP SCREEN */
+#setup-screen{position:fixed;inset:0;background:linear-gradient(135deg,#7C3AED,#EC4899);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px;text-align:center;overflow-y:auto;}
+#setup-screen h2{color:white;font-size:1.8rem;font-weight:800;margin-bottom:6px;}
+#setup-screen .sub{color:rgba(255,255,255,0.85);font-size:0.9rem;margin-bottom:24px;}
+.setup-profiles{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px;}
+.setup-card{background:white;border-radius:18px;padding:14px 16px;}
+.setup-card-label{font-size:0.7rem;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;}
+.setup-row{display:flex;align-items:center;gap:12px;}
+.setup-avatar-btn{font-size:2rem;background:none;border:none;cursor:pointer;flex-shrink:0;padding:4px;}
+.setup-name-in{flex:1;border:2px solid #E5E7EB;border-radius:10px;padding:10px 12px;font-size:0.95rem;font-weight:700;color:#374151;}
+.setup-name-in:focus{border-color:#7C3AED;}
+.setup-start-btn{margin-top:20px;background:white;color:#7C3AED;font-weight:800;font-size:1.1rem;border-radius:16px;padding:14px 40px;width:100%;max-width:340px;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
+
+/* SETTINGS MODAL */
+#settings-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:flex-end;justify-content:center;z-index:999;}
+#settings-modal.open{display:flex;}
+.modal-box{background:white;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;}
+.modal-title{font-size:1.1rem;font-weight:800;color:#1F2937;margin-bottom:18px;}
+.field-label{font-size:0.75rem;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+.text-in{width:100%;border:2px solid #E5E7EB;border-radius:10px;padding:10px 12px;font-size:0.9rem;color:#374151;}
+.text-in:focus{border-color:#7C3AED;}
+.profile-edit-item{background:#F9FAFB;border-radius:14px;padding:12px;margin-bottom:10px;}
+.avatar-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.av-opt{width:38px;height:38px;border-radius:10px;font-size:1.2rem;display:flex;align-items:center;justify-content:center;background:#F3F4F6;cursor:pointer;border:2px solid transparent;transition:all 0.15s;}
+.av-opt.sel{border-color:#7C3AED;background:#EDE9FF;}
+.modal-btns{display:flex;gap:8px;margin-top:16px;}
+.reset-link{display:block;text-align:center;color:#EF4444;font-size:0.8rem;font-weight:600;margin-top:12px;cursor:pointer;}
+
+/* ANALYZING */
+#analyzing{position:fixed;inset:0;background:rgba(255,255,255,0.93);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:500;text-align:center;}
+#analyzing.show{display:flex;}
+.spin{font-size:4rem;animation:spin 1.5s linear infinite;display:block;margin-bottom:16px;}
+#analyzing h3{font-size:1.2rem;font-weight:800;color:#7C3AED;}
+#analyzing p{color:#9CA3AF;font-size:0.85rem;margin-top:6px;}
+
+/* HEADER */
+#header{background:linear-gradient(135deg,#7C3AED,#EC4899);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(124,58,237,0.3);}
+#header h1{color:white;font-size:1.25rem;font-weight:800;}
+#hdr-right{display:flex;align-items:center;gap:10px;}
+.hdr-btn{background:rgba(255,255,255,0.25);color:white;border-radius:50%;width:34px;height:34px;font-size:1rem;display:flex;align-items:center;justify-content:center;}
+
+/* PROFILE BAR */
+#profile-bar{background:white;padding:10px 14px;display:flex;gap:8px;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.prf-btn{flex:1;max-width:110px;background:#F5F3FF;border-radius:14px;padding:8px 4px;text-align:center;cursor:pointer;transition:all 0.2s;border:3px solid transparent;}
+.prf-btn.active{border-color:#7C3AED;background:#EDE9FF;}
+.prf-av{font-size:1.8rem;line-height:1;margin-bottom:3px;}
+.prf-nm{font-size:0.7rem;font-weight:700;color:#4B5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;}
+
+/* CONTENT & NAV */
+#tab-content{padding:14px 14px 86px;max-width:480px;margin:0 auto;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:2px solid #EDE9FF;display:flex;box-shadow:0 -4px 16px rgba(0,0,0,0.08);z-index:100;}
+.nav-btn{flex:1;padding:10px 0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;color:#9CA3AF;font-size:0.65rem;font-weight:700;transition:all 0.15s;}
+.nav-icon{font-size:1.4rem;}
+.nav-btn.active{color:#7C3AED;}
+.nav-btn.active .nav-icon{transform:scale(1.15);}
+
+/* CARDS */
+.card{background:white;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,0.06);}
+.ctitle{font-size:1rem;font-weight:800;color:#1F2937;margin-bottom:12px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:14px;font-size:0.95rem;font-weight:700;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.13);}
+.btn:active{transform:scale(0.97);}
+.btn-full{width:100%;}
+.btn-lg{padding:14px 24px;font-size:1rem;border-radius:16px;}
+.btn-purple{background:linear-gradient(135deg,#7C3AED,#9333EA);color:white;}
+.btn-green{background:linear-gradient(135deg,#10B981,#059669);color:white;}
+.btn-red{background:linear-gradient(135deg,#EF4444,#DC2626);color:white;}
+.btn-amber{background:linear-gradient(135deg,#F59E0B,#D97706);color:white;}
+.btn-pink{background:linear-gradient(135deg,#EC4899,#DB2777);color:white;}
+.btn-gray{background:#F3F4F6;color:#374151;box-shadow:none;}
+
+/* INPUT TOGGLE */
+.inp-toggle{display:flex;gap:8px;margin-bottom:12px;}
+.inp-tab{flex:1;padding:10px;border-radius:12px;font-weight:700;font-size:0.85rem;transition:all 0.2s;}
+.inp-tab.active{background:linear-gradient(135deg,#7C3AED,#9333EA);color:white;box-shadow:0 4px 10px rgba(124,58,237,0.3);}
+.inp-tab:not(.active){background:#F3F4F6;color:#6B7280;}
+
+/* CAMERA BOX */
+#cam-box{background:#0F0F1A;border-radius:16px;overflow:hidden;aspect-ratio:4/3;position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+#cam-video{width:100%;height:100%;object-fit:cover;}
+#rec-badge{position:absolute;top:10px;right:10px;background:rgba(239,68,68,0.92);color:white;border-radius:20px;padding:4px 10px;font-size:0.78rem;font-weight:700;display:none;align-items:center;gap:5px;}
+.rec-dot{width:7px;height:7px;border-radius:50%;background:white;animation:blink 1s infinite;}
+#cam-placeholder{text-align:center;color:#6B7280;}
+.big-emo{font-size:4rem;margin-bottom:10px;}
+
+/* UPLOAD */
+#upload-area{border:3px dashed #C4B5FD;border-radius:16px;padding:28px 16px;text-align:center;cursor:pointer;background:#FAFAFF;margin-bottom:12px;transition:all 0.2s;}
+#upload-area:hover{border-color:#7C3AED;background:#F5F3FF;}
+.up-icon{font-size:2.8rem;margin-bottom:8px;}
+#file-in{display:none;}
+#upload-vid-wrap{margin-bottom:12px;}
+#upload-vid{width:100%;border-radius:14px;max-height:260px;}
+
+/* FEEDBACK */
+#feedback-card{display:none;}
+.fb-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.score-lbl{font-size:0.68rem;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;}
+.stars-row{display:flex;gap:3px;margin-bottom:4px;}
+.star-ic{font-size:1.5rem;}
+.star-full{color:#F59E0B;}
+.star-empty{color:#D1D5DB;}
+.score-big{font-size:1.5rem;font-weight:800;color:#7C3AED;}
+.trophy-big{font-size:3.2rem;}
+.quote-box{background:linear-gradient(135deg,#F5F3FF,#FCE7F3);border-left:4px solid #7C3AED;border-radius:0 12px 12px 0;padding:12px 14px;margin-bottom:14px;font-style:italic;color:#4B5563;font-size:0.88rem;line-height:1.5;}
+.fb-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.fb-item{background:#F9FAFB;border-radius:12px;padding:10px;}
+.fb-lbl{font-size:0.68rem;font-weight:700;color:#9CA3AF;margin-bottom:3px;}
+.fb-txt{font-size:0.78rem;color:#374151;line-height:1.4;}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pos-box{background:#ECFDF5;border-radius:12px;padding:10px;border:1px solid #A7F3D0;}
+.imp-box{background:#FFFBEB;border-radius:12px;padding:10px;border:1px solid #FDE68A;}
+.pos-lbl{color:#059669;font-size:0.7rem;font-weight:700;margin-bottom:5px;}
+.imp-lbl{color:#D97706;font-size:0.7rem;font-weight:700;margin-bottom:5px;}
+.pos-box p,.imp-box p{font-size:0.78rem;line-height:1.5;margin-bottom:2px;}
+.pos-box p{color:#065F46;}
+.imp-box p{color:#92400E;}
+.enc-box{margin-top:10px;text-align:center;font-size:1rem;font-weight:700;color:#7C3AED;padding:10px;background:#F5F3FF;border-radius:12px;}
+
+/* WEEKLY */
+.week-days{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.day-cell{background:#F9FAFB;border-radius:12px;padding:8px 4px;text-align:center;border:2px solid transparent;}
+.day-cell.today{background:#EDE9FF;border-color:#7C3AED;}
+.day-lbl{font-size:0.65rem;font-weight:700;color:#9CA3AF;margin-bottom:4px;}
+.day-cell.today .day-lbl{color:#7C3AED;}
+.day-stars{font-size:0.9rem;color:#F59E0B;min-height:18px;}
+.day-num{font-size:0.65rem;color:#D97706;font-weight:700;margin-top:2px;}
+
+/* TUNER */
+.string-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.str-pill{background:#F5F3FF;border-radius:12px;padding:10px 4px;text-align:center;font-weight:800;font-size:1.5rem;border:2px solid transparent;transition:all 0.2s;}
+.str-pill.hl{border-color:#7C3AED;background:#EDE9FF;}
+.str-hz{font-size:0.68rem;color:#9CA3AF;font-weight:400;}
+#tuner-display{background:linear-gradient(135deg,#1E1B4B,#312E81);border-radius:18px;padding:26px 20px;text-align:center;margin-bottom:14px;}
+#tun-note{font-size:4.5rem;font-weight:800;color:white;line-height:1;}
+#tun-freq{color:#A5B4FC;font-size:0.85rem;margin-bottom:16px;}
+#needle-track{position:relative;height:16px;background:rgba(255,255,255,0.1);border-radius:8px;margin:0 8px 6px;}
+#needle-ctr{position:absolute;left:50%;top:0;width:2px;height:100%;background:#34D399;transform:translateX(-50%);}
+#needle-ball{position:absolute;top:2px;width:12px;height:12px;border-radius:50%;background:#F59E0B;left:50%;transform:translateX(-50%);transition:left 0.1s ease,background 0.2s;}
+.needle-lbls{display:flex;justify-content:space-between;padding:0 8px;margin-bottom:14px;}
+.needle-lbls span{color:rgba(165,180,252,0.65);font-size:0.65rem;}
+#tune-status{font-size:1.1rem;font-weight:700;color:white;}
+
+/* SCALES */
+.type-toggle{display:flex;gap:8px;margin-bottom:12px;}
+.type-btn{flex:1;padding:10px;border-radius:12px;font-weight:700;font-size:0.88rem;transition:all 0.2s;}
+.type-btn:not(.active){background:#F3F4F6;color:#6B7280;}
+.type-btn.major.active{background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;}
+.type-btn.minor.active{background:linear-gradient(135deg,#1D4ED8,#1E40AF);color:white;}
+.scale-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;}
+.sk-btn{padding:9px 4px;border-radius:10px;font-weight:800;font-size:0.85rem;transition:all 0.15s;background:#F3F4F6;color:#4B5563;}
+.sk-btn.active{background:linear-gradient(135deg,#7C3AED,#9333EA);color:white;}
+.oct-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.oct-lbl{font-size:0.8rem;font-weight:700;color:#6B7280;flex-shrink:0;}
+.oct-btn{width:34px;height:34px;border-radius:10px;font-weight:800;font-size:0.88rem;transition:all 0.15s;background:#F3F4F6;color:#6B7280;}
+.oct-btn.active{background:#7C3AED;color:white;}
+#scale-title{text-align:center;font-size:1.1rem;font-weight:800;color:#1F2937;margin-bottom:12px;}
+#scale-notes{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;justify-content:center;}
+.nb{border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;transition:all 0.15s;cursor:pointer;border:2px solid transparent;}
+.nb.playing{transform:scale(1.18);border-color:white!important;box-shadow:0 0 16px rgba(0,0,0,0.2)!important;}
+.scale-play-row{display:flex;gap:8px;}
+.scale-tip-box{background:#F5F3FF;border-radius:14px;padding:14px;}
+.scale-tip-box p{font-size:0.82rem;color:#4B5563;line-height:1.8;}
+
+/* MISC */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes pop{0%{transform:scale(0.85);opacity:0}70%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop 0.4s ease forwards;}
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP SCREEN ══════════════════════════════════════ -->
+<div id="setup-screen">
+  <div style="font-size:4rem;margin-bottom:12px">🎻</div>
+  <h2>Violin Star Coach!</h2>
+  <p class="sub">Set up 3 players — tap the emoji to change it!</p>
+  <div class="setup-profiles">
+    <div class="setup-card">
+      <div class="setup-card-label">🎻 Player 1</div>
+      <div class="setup-row">
+        <button class="setup-avatar-btn" id="sav0" onclick="cycleAvatar(0)">🧒</button>
+        <input class="setup-name-in" id="sname0" placeholder="Enter name..." value="Player 1">
+      </div>
+    </div>
+    <div class="setup-card">
+      <div class="setup-card-label">🎵 Player 2</div>
+      <div class="setup-row">
+        <button class="setup-avatar-btn" id="sav1" onclick="cycleAvatar(1)">👧</button>
+        <input class="setup-name-in" id="sname1" placeholder="Enter name..." value="Player 2">
+      </div>
+    </div>
+    <div class="setup-card">
+      <div class="setup-card-label">🌟 Player 3</div>
+      <div class="setup-row">
+        <button class="setup-avatar-btn" id="sav2" onclick="cycleAvatar(2)">🌟</button>
+        <input class="setup-name-in" id="sname2" placeholder="Enter name..." value="Player 3">
+      </div>
+    </div>
+  </div>
+  <button class="setup-start-btn" onclick="saveSetup()">🚀 Let's Start Practising!</button>
+</div>
+
+<!-- ══ SETTINGS ══════════════════════════════════════════ -->
+<div id="settings-modal">
+  <div class="modal-box">
+    <p class="modal-title">⚙️ Settings</p>
+    <div style="margin-bottom:16px">
+      <p class="field-label">🔑 Gemini AI Key (free!)</p>
+      <input type="text" id="gem-key-in" class="text-in" placeholder="Paste your free Gemini key here...">
+      <a href="https://aistudio.google.com/apikey" target="_blank" style="font-size:0.75rem;color:#7C3AED;display:block;margin-top:6px;text-decoration:none">→ Get free key at aistudio.google.com/apikey</a>
+    </div>
+    <div id="profile-settings"></div>
+    <div class="modal-btns">
+      <button class="btn btn-purple" style="flex:1" onclick="saveSettings()">💾 Save</button>
+      <button class="btn btn-gray" style="flex:1" onclick="closeSettings()">Cancel</button>
+    </div>
+    <span class="reset-link" onclick="resetAll()">🗑 Reset all data</span>
+  </div>
+</div>
+
+<!-- ══ ANALYZING ═════════════════════════════════════════ -->
+<div id="analyzing">
+  <span class="spin">🎻</span>
+  <h3>Analysing your playing...</h3>
+  <p>Gemini AI is reviewing your performance!</p>
+  <p style="margin-top:4px;color:#C4B5FD">This may take 10–15 seconds</p>
+</div>
+
+<!-- ══ HEADER ════════════════════════════════════════════ -->
+<header id="header">
+  <h1>🎻 Violin Star Coach</h1>
+  <div id="hdr-right">
+    <button class="hdr-btn" onclick="openSettings()">⚙️</button>
+  </div>
+</header>
+
+<!-- ══ PROFILE BAR ════════════════════════════════════════ -->
+<div id="profile-bar">
+  <div class="prf-btn active" onclick="selectProfile(0)">
+    <div class="prf-av" id="pav0">🧒</div>
+    <div class="prf-nm" id="pnm0">Player 1</div>
+  </div>
+  <div class="prf-btn" onclick="selectProfile(1)">
+    <div class="prf-av" id="pav1">👧</div>
+    <div class="prf-nm" id="pnm1">Player 2</div>
+  </div>
+  <div class="prf-btn" onclick="selectProfile(2)">
+    <div class="prf-av" id="pav2">🌟</div>
+    <div class="prf-nm" id="pnm2">Player 3</div>
+  </div>
+</div>
+
+<!-- ══ TAB CONTENT ════════════════════════════════════════ -->
+<div id="tab-content">
+
+  <!-- PRACTICE TAB -->
+  <div id="practice-tab" class="tab-pane active">
+    <div class="card">
+      <p class="ctitle">🎻 Practice Session</p>
+
+      <!-- Input toggle -->
+      <div class="inp-toggle">
+        <button class="inp-tab active" onclick="switchInput('camera')">📷 Camera</button>
+        <button class="inp-tab" onclick="switchInput('upload')">📁 Upload Video</button>
+      </div>
+
+      <!-- Camera section -->
+      <div id="cam-section">
+        <div id="cam-box">
+          <div id="cam-placeholder"><div class="big-emo">🎻</div><p style="font-size:0.85rem">Tap Start Camera to begin!</p></div>
+          <video id="cam-video" autoplay muted playsinline class="hidden"></video>
+          <div id="rec-badge"><div class="rec-dot"></div>REC <span id="rec-timer">0:00</span></div>
+        </div>
+        <button class="btn btn-purple btn-full btn-lg" id="cam-btn" onclick="handleCamBtn()">📷 Start Camera</button>
+      </div>
+
+      <!-- Upload section -->
+      <div id="up-section" class="hidden">
+        <div id="upload-area" onclick="document.getElementById('file-in').click()">
+          <div class="up-icon">🎬</div>
+          <p style="font-weight:700;color:#4B5563;margin-bottom:4px">Tap to choose a video</p>
+          <p style="color:#9CA3AF;font-size:0.82rem">MP4, MOV, or WebM</p>
+        </div>
+        <input type="file" id="file-in" accept="video/*" onchange="handleUpload(event)">
+        <div id="vid-preview-wrap" class="hidden">
+          <video id="upload-vid" controls></video><br>
+          <button class="btn btn-purple btn-full btn-lg" style="margin-top:10px" onclick="analyzeUpload()">🔍 Analyse This Video</button>
+          <button class="btn btn-gray btn-full" style="margin-top:8px" onclick="resetUpload()">🔄 Choose Different Video</button>
+        </div>
+      </div>
+    </div><!-- end card -->
+
+    <!-- Feedback card -->
+    <div class="card" id="feedback-card">
+      <div class="fb-header">
+        <div>
+          <p class="score-lbl">Score for <span id="fb-pname"></span></p>
+          <div class="stars-row" id="fb-stars"></div>
+          <p class="score-big" id="fb-score"></p>
+        </div>
+        <div class="trophy-big" id="fb-trophy"></div>
+      </div>
+      <div class="quote-box" id="fb-overall"></div>
+      <div class="fb-grid">
+        <div class="fb-item"><p class="fb-lbl">🧍 Posture</p><p class="fb-txt" id="fb-posture"></p></div>
+        <div class="fb-item"><p class="fb-lbl">🎻 Hold</p><p class="fb-txt" id="fb-hold"></p></div>
+        <div class="fb-item"><p class="fb-lbl">🏹 Bowing</p><p class="fb-txt" id="fb-bow"></p></div>
+        <div class="fb-item"><p class="fb-lbl">🎯 Intonation</p><p class="fb-txt" id="fb-intone"></p></div>
+      </div>
+      <div class="twocol">
+        <div class="pos-box">
+          <p class="pos-lbl">✅ Well done!</p>
+          <div id="fb-pos"></div>
+        </div>
+        <div class="imp-box">
+          <p class="imp-lbl">💡 Work on this</p>
+          <div id="fb-imp"></div>
+        </div>
+      </div>
+      <div class="enc-box" id="fb-enc"></div>
+    </div>
+
+    <!-- Weekly tracker -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <p class="ctitle" style="margin-bottom:0">📅 This Week</p>
+        <div style="background:#7C3AED;color:white;border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:700" id="week-total">⭐ 0 total</div>
+      </div>
+      <div class="week-days" id="week-days"></div>
+    </div>
+  </div><!-- end practice-tab -->
+
+  <!-- TUNER TAB -->
+  <div id="tuner-tab" class="tab-pane">
+    <div class="card">
+      <p class="ctitle">🎯 Violin Tuner</p>
+      <p style="color:#6B7280;font-size:0.83rem;margin-bottom:14px">Play a string and watch the needle move to the centre!</p>
+      <div class="string-grid">
+        <div class="str-pill" id="str-G"><div>G</div><div class="str-hz">196 Hz</div></div>
+        <div class="str-pill" id="str-D"><div>D</div><div class="str-hz">294 Hz</div></div>
+        <div class="str-pill" id="str-A"><div>A</div><div class="str-hz">440 Hz</div></div>
+        <div class="str-pill" id="str-E"><div>E</div><div class="str-hz">659 Hz</div></div>
+      </div>
+      <div id="tuner-display">
+        <div id="tun-note">🎻</div>
+        <div id="tun-freq"></div>
+        <div id="needle-track">
+          <div id="needle-ctr"></div>
+          <div id="needle-ball"></div>
+        </div>
+        <div class="needle-lbls"><span>♭ Flat</span><span style="color:#34D399">● In Tune</span><span>Sharp ♯</span></div>
+        <div id="tune-status">Tap Start Tuner then play a string</div>
+      </div>
+      <div style="display:flex;justify-content:center;margin-top:14px">
+        <button class="btn btn-purple btn-lg" id="tun-btn" onclick="toggleTuner()">🎙 Start Tuner</button>
+      </div>
+    </div>
+    <div class="card" style="background:linear-gradient(135deg,#F5F3FF,#FCE7F3);">
+      <p style="font-size:0.88rem;font-weight:700;color:#7C3AED;margin-bottom:10px">🎻 How to tune your violin</p>
+      <p style="color:#4B5563;font-size:0.83rem;line-height:1.8">
+        1️⃣ Start with the <b>A string (440 Hz)</b><br>
+        2️⃣ Play the string slowly and watch the needle<br>
+        3️⃣ Green + centred = perfectly in tune ✅<br>
+        4️⃣ Then tune D → G → E<br>
+        5️⃣ Always tune <b>up</b> to the note, never down
+      </p>
+    </div>
+  </div><!-- end tuner-tab -->
+
+  <!-- SCALES TAB -->
+  <div id="scales-tab" class="tab-pane">
+    <div class="card">
+      <p class="ctitle">🎵 Scale Explorer</p>
+
+      <div class="type-toggle">
+        <button class="type-btn major active" onclick="setScaleType('major')">☀️ Major — Happy!</button>
+        <button class="type-btn minor" onclick="setScaleType('minor')">🌙 Minor — Mysterious!</button>
+      </div>
+
+      <div class="scale-keys" id="scale-keys"></div>
+
+      <div class="oct-row">
+        <span class="oct-lbl">🎼 Octaves:</span>
+        <button class="oct-btn active" id="oct1" onclick="setOctaves(1)">1</button>
+        <button class="oct-btn" id="oct2" onclick="setOctaves(2)">2</button>
+        <button class="oct-btn" id="oct3" onclick="setOctaves(3)">3</button>
+        <span style="color:#9CA3AF;font-size:0.75rem">(higher = more notes!)</span>
+      </div>
+
+      <div id="scale-title"></div>
+      <div id="scale-notes"></div>
+
+      <div class="scale-play-row">
+        <button class="btn btn-green btn-full" id="play-btn" onclick="playScale()">▶ Play Scale Up &amp; Down</button>
+        <button class="btn btn-red" id="stop-btn" style="display:none" onclick="stopScale()">⏹ Stop</button>
+      </div>
+      <p style="text-align:center;color:#9CA3AF;font-size:0.72rem;margin-top:8px">👆 Tap any coloured bubble to hear that note</p>
+    </div>
+    <div class="scale-tip-box">
+      <p><b style="color:#7C3AED">💡 How to practise scales:</b></p>
+      <p>1️⃣ Press Play and listen carefully first</p>
+      <p>2️⃣ Try to match each note on your violin</p>
+      <p>3️⃣ Play slowly — one note at a time</p>
+      <p>4️⃣ Scales go up and then back down ⬆️⬇️</p>
+      <p>5️⃣ Major = bright &amp; happy ☀️ | Minor = deep &amp; mysterious 🌙</p>
+    </div>
+  </div><!-- end scales-tab -->
+
+</div><!-- end tab-content -->
+
+<!-- ══ BOTTOM NAV ═════════════════════════════════════════ -->
+<nav id="bottom-nav">
+  <button class="nav-btn active" onclick="switchTab('practice')">
+    <span class="nav-icon">🎻</span>Practice
+  </button>
+  <button class="nav-btn" onclick="switchTab('tuner')">
+    <span class="nav-icon">🎯</span>Tuner
+  </button>
+  <button class="nav-btn" onclick="switchTab('scales')">
+    <span class="nav-icon">🎵</span>Scales
+  </button>
+</nav>
+
+<script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+<script>
+// ════════════════════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════════════════════
+const CHROMATIC = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTE_ST = {'C':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'Fb':4,'F':5,'F#':6,'Gb':6,'G':7,'G#':8,'Ab':8,'A':9,'A#':10,'Bb':10,'B':11,'Cb':11};
+const VIOLIN_STRINGS = [{name:'G',freq:196},{name:'D',freq:293.66},{name:'A',freq:440},{name:'E',freq:659.25}];
+const DAYS = ['Mon','Tue','Wed','Thu','Fri'];
+const AVATARS = ['🧒','👧','🧒‍♀️','🎻','🌟','🎵','🎶','🦋','🌈','🐰','🦊','🐬','🎀','🌸','🎠'];
+
+const SCALE_SP = {
+  major:{
+    'C':['C','D','E','F','G','A','B'],'G':['G','A','B','C','D','E','F#'],
+    'D':['D','E','F#','G','A','B','C#'],'A':['A','B','C#','D','E','F#','G#'],
+    'E':['E','F#','G#','A','B','C#','D#'],'B':['B','C#','D#','E','F#','G#','A#'],
+    'Gb':['Gb','Ab','Bb','Cb','Db','Eb','F'],'Db':['Db','Eb','F','Gb','Ab','Bb','C'],
+    'Ab':['Ab','Bb','C','Db','Eb','F','G'],'Eb':['Eb','F','G','Ab','Bb','C','D'],
+    'Bb':['Bb','C','D','Eb','F','G','A'],'F':['F','G','A','Bb','C','D','E']
+  },
+  minor:{
+    'A':['A','B','C','D','E','F','G'],'E':['E','F#','G','A','B','C','D'],
+    'B':['B','C#','D','E','F#','G','A'],'F#':['F#','G#','A','B','C#','D','E'],
+    'C#':['C#','D#','E','F#','G#','A','B'],'G#':['G#','A#','B','C#','D#','E','F#'],
+    'D':['D','E','F','G','A','Bb','C'],'G':['G','A','Bb','C','D','Eb','F'],
+    'C':['C','D','Eb','F','G','Ab','Bb'],'F':['F','G','Ab','Bb','C','Db','Eb'],
+    'Bb':['Bb','C','Db','Eb','F','Gb','Ab'],'Eb':['Eb','F','Gb','Ab','Bb','Cb','Db']
+  }
+};
+const SCALE_OCT = {
+  major:{'C':4,'G':3,'D':4,'A':3,'E':4,'B':3,'Gb':4,'Db':4,'Ab':3,'Eb':4,'Bb':3,'F':4},
+  minor:{'A':3,'E':4,'B':3,'F#':4,'C#':4,'G#':3,'D':4,'G':3,'C':4,'F':4,'Bb':3,'Eb':4}
+};
+// Rainbow colours for note bubbles (7 degrees)
+const NB_COLS = [
+  {bg:'#FEE2E2',c:'#991B1B'},{bg:'#FEF3C7',c:'#92400E'},{bg:'#D1FAE5',c:'#064E3B'},
+  {bg:'#CFFAFE',c:'#164E63'},{bg:'#DBEAFE',c:'#1E3A5F'},{bg:'#EDE9FE',c:'#4C1D95'},
+  {bg:'#FCE7F3',c:'#831843'}
+];
+
+// ════════════════════════════════════════════════════════
+// APP STATE
+// ════════════════════════════════════════════════════════
+let S = {
+  profiles:[
+    {name:'Player 1',avatar:'🧒',stars:{}},
+    {name:'Player 2',avatar:'👧',stars:{}},
+    {name:'Player 3',avatar:'🌟',stars:{}}
+  ],
+  cur:0, gemKey:'', tab:'practice',
+  scType:'major', scKey:'D', octaves:1, setupDone:false,
+  setupAvatars:['🧒','👧','🌟']
+};
+
+function loadS(){try{const d=localStorage.getItem('vsc3');if(d){const p=JSON.parse(d);S={...S,...p};while(S.profiles.length<3)S.profiles.push({name:'Player '+(S.profiles.length+1),avatar:'🌟',stars:{}});}}catch(e){}}
+function saveS(){localStorage.setItem('vsc3',JSON.stringify(S));}
+
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+function weekKey(){const n=new Date(),d=n.getDay(),m=new Date(n);m.setDate(n.getDate()-(d===0?6:d-1));return`${m.getFullYear()}-${String(m.getMonth()+1).padStart(2,'0')}-${String(m.getDate()).padStart(2,'0')}`;}
+function todayIdx(){const d=new Date().getDay();return(d===0||d===6)?-1:d-1;}
+function getWeekStars(pi){const wk=weekKey(),p=S.profiles[pi];if(!p.stars[wk])return[0,0,0,0,0];return DAYS.map((_,i)=>p.stars[wk][i]||0);}
+function setDayStars(pi,di,v){const wk=weekKey(),p=S.profiles[pi];if(!p.stars[wk])p.stars[wk]={};p.stars[wk][di]=Math.max(p.stars[wk][di]||0,v);saveS();}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ════════════════════════════════════════════════════════
+// SETUP
+// ════════════════════════════════════════════════════════
+let setupAv=[...S.setupAvatars];
+function cycleAvatar(i){setupAv[i]=AVATARS[(AVATARS.indexOf(setupAv[i])+1)%AVATARS.length];document.getElementById('sav'+i).textContent=setupAv[i];}
+function saveSetup(){
+  for(let i=0;i<3;i++){
+    const n=document.getElementById('sname'+i).value.trim()||'Player '+(i+1);
+    S.profiles[i].name=n; S.profiles[i].avatar=setupAv[i];
+  }
+  S.setupAvatars=[...setupAv];
+  S.setupDone=true; saveS();
+  document.getElementById('setup-screen').style.display='none';
+  renderAll();
+}
+
+// ════════════════════════════════════════════════════════
+// PROFILES
+// ════════════════════════════════════════════════════════
+function selectProfile(i){
+  S.cur=i; saveS();
+  document.querySelectorAll('.prf-btn').forEach((el,j)=>el.classList.toggle('active',j===i));
+  renderWeek();
+}
+function renderProfiles(){
+  S.profiles.forEach((p,i)=>{
+    const a=document.getElementById('pav'+i),n=document.getElementById('pnm'+i);
+    if(a)a.textContent=p.avatar; if(n)n.textContent=p.name;
+  });
+  document.querySelectorAll('.prf-btn').forEach((el,i)=>el.classList.toggle('active',i===S.cur));
+}
+
+// ════════════════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════════════════
+function openSettings(){
+  document.getElementById('gem-key-in').value=S.gemKey||'';
+  const c=document.getElementById('profile-settings');
+  c.innerHTML=S.profiles.map((p,i)=>`
+    <div class="profile-edit-item">
+      <p class="field-label" style="margin-bottom:8px">Player ${i+1}</p>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:1.8rem">${esc(p.avatar)}</span>
+        <input type="text" class="text-in" id="sname_${i}" value="${esc(p.name)}" style="flex:1">
+      </div>
+      <p class="field-label">Avatar</p>
+      <div class="avatar-row">
+        ${AVATARS.map(av=>`<div class="av-opt ${p.avatar===av?'sel':''}" data-p="${i}" data-av="${av}" onclick="pickAv(${i},'${av}')">${av}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('settings-modal').classList.add('open');
+}
+function pickAv(pi,av){
+  S.profiles[pi].avatar=av;
+  document.querySelectorAll(`.av-opt[data-p="${pi}"]`).forEach(el=>el.classList.toggle('sel',el.dataset.av===av));
+}
+function saveSettings(){
+  S.gemKey=document.getElementById('gem-key-in').value.trim();
+  for(let i=0;i<3;i++){const el=document.getElementById('sname_'+i);if(el)S.profiles[i].name=el.value.trim()||S.profiles[i].name;}
+  saveS(); renderProfiles(); closeSettings();
+}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
+function resetAll(){if(confirm('Reset ALL data including all stars and profiles?')){localStorage.removeItem('vsc3');location.reload();}}
+
+// ════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════
+function switchTab(t){
+  S.tab=t; saveS();
+  document.querySelectorAll('.tab-pane').forEach(el=>el.classList.remove('active'));
+  document.getElementById(t+'-tab').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((el,i)=>el.classList.toggle('active',['practice','tuner','scales'][i]===t));
+  if(t!=='tuner')stopTuner();
+  if(t!=='scales')stopScale();
+}
+
+// ════════════════════════════════════════════════════════
+// PITCH DETECTION
+// ════════════════════════════════════════════════════════
+function autoCorr(buf,sr){
+  const n=buf.length;let rms=0;
+  for(let i=0;i<n;i++)rms+=buf[i]*buf[i];
+  if(Math.sqrt(rms/n)<0.015)return-1;
+  let r1=0,r2=n-1;
+  for(let i=0;i<n/2;i++){if(Math.abs(buf[i])<0.2){r1=i;break;}}
+  for(let i=1;i<n/2;i++){if(Math.abs(buf[n-i])<0.2){r2=n-i;break;}}
+  const b=buf.slice(r1,r2),sz=b.length,c=new Float32Array(sz);
+  for(let i=0;i<sz;i++)for(let j=0;j<sz-i;j++)c[i]+=b[j]*b[j+i];
+  let d=0;while(c[d]>c[d+1])d++;
+  let mx=-1,mp=-1;for(let i=d;i<sz;i++)if(c[i]>mx){mx=c[i];mp=i;}
+  if(mp<=0||mp>=sz-1)return-1;
+  const x1=c[mp-1],x2=c[mp],x3=c[mp+1],a=(x1+x3-2*x2)/2,bv=(x3-x1)/2;
+  return sr/(a?mp-bv/(2*a):mp);
+}
+function f2note(f){
+  if(f<150||f>1400)return null;
+  const m=12*Math.log2(f/440)+69,r=Math.round(m);
+  return{name:CHROMATIC[((r%12)+12)%12],oct:Math.floor(r/12)-1,cents:(m-r)*100,freq:f};
+}
+
+// ════════════════════════════════════════════════════════
+// TUNER
+// ════════════════════════════════════════════════════════
+let tunActive=false,tunStream=null,tunAC=null,tunAn=null,tunRAF=null;
+function toggleTuner(){tunActive?stopTuner():startTuner();}
+async function startTuner(){
+  try{
+    tunStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    tunAC=new AudioContext(); tunAn=tunAC.createAnalyser(); tunAn.fftSize=4096;
+    tunAC.createMediaStreamSource(tunStream).connect(tunAn);
+    tunActive=true;
+    const b=document.getElementById('tun-btn');b.textContent='⏹ Stop Tuner';b.className='btn btn-red btn-lg';
+    (function go(){
+      if(!tunActive||!tunAn)return;
+      const buf=new Float32Array(4096);tunAn.getFloatTimeDomainData(buf);
+      const f=autoCorr(buf,tunAC.sampleRate);if(f>0)updateTuner(f);
+      tunRAF=requestAnimationFrame(go);
+    })();
+  }catch{alert('Please allow microphone access.');}
+}
+function stopTuner(){
+  if(!tunActive)return;tunActive=false;cancelAnimationFrame(tunRAF);
+  tunStream?.getTracks().forEach(t=>t.stop());tunAC?.close();
+  const b=document.getElementById('tun-btn');if(b){b.textContent='🎙 Start Tuner';b.className='btn btn-purple btn-lg';}
+  document.getElementById('tun-note').textContent='🎻';
+  document.getElementById('tun-freq').textContent='';
+  document.getElementById('tune-status').textContent='Tap Start Tuner then play a string';
+  document.getElementById('tune-status').style.color='white';
+  document.getElementById('needle-ball').style.left='50%';
+  document.getElementById('needle-ball').style.background='#F59E0B';
+  document.querySelectorAll('.str-pill').forEach(el=>el.classList.remove('hl'));
+}
+function updateTuner(freq){
+  const n=f2note(freq);if(!n)return;
+  const c=n.cents,abs=Math.abs(c);
+  const col=abs<7?'#34D399':abs<18?'#F59E0B':'#EF4444';
+  const msg=abs<7?'✅ In tune! Great!':abs<18?(c>0?'↓ A tiny bit sharp':'↑ A tiny bit flat'):(c>0?'↓ Too sharp — lower the note':'↑ Too flat — raise the note');
+  document.getElementById('tun-note').textContent=n.name+n.oct;
+  document.getElementById('tun-freq').textContent=freq.toFixed(1)+' Hz';
+  const ts=document.getElementById('tune-status');ts.textContent=msg;ts.style.color=col;
+  const pos=Math.max(5,Math.min(95,50+(c/50)*45));
+  const ball=document.getElementById('needle-ball');ball.style.left=pos+'%';ball.style.background=col;
+  const cl=VIOLIN_STRINGS.reduce((a,b)=>Math.abs(b.freq-freq)<Math.abs(a.freq-freq)?b:a);
+  document.querySelectorAll('.str-pill').forEach(el=>el.classList.remove('hl'));
+  const se=document.getElementById('str-'+cl.name);if(se)se.classList.add('hl');
+}
+
+// ════════════════════════════════════════════════════════
+// SCALES
+// ════════════════════════════════════════════════════════
+let scType='major',scKey='D',scOct=1,scPlaying=false,scSynth=null,scStop=false;
+
+function setScaleType(t){
+  scType=t; scKey=Object.keys(SCALE_SP[t])[0]; S.scType=t; S.scKey=scKey; saveS();
+  document.querySelectorAll('.type-btn').forEach(el=>el.classList.toggle('active',el.classList.contains(t)));
+  stopScale(); renderScaleKeys(); renderScaleNotes();
+}
+function pickScaleKey(k){scKey=k;S.scKey=k;saveS();stopScale();renderScaleKeys();renderScaleNotes();}
+function setOctaves(n){
+  scOct=n;S.octaves=n;saveS();
+  [1,2,3].forEach(i=>{const el=document.getElementById('oct'+i);if(el)el.classList.toggle('active',i===n);});
+  stopScale(); renderScaleNotes();
+}
+
+function buildNotes(names,startOct,numOct){
+  const res=[];let oct=startOct;
+  for(let o=0;o<numOct;o++){
+    for(let i=0;i<names.length;i++){
+      const semi=NOTE_ST[names[i]]??0;
+      const prev=i>0?names[i-1]:(o>0?names[names.length-1]:null);
+      if(prev!==null){const ps=NOTE_ST[prev]??0;if(semi<=ps)oct++;}
+      res.push({n:names[i],o:oct});
+    }
+  }
+  res.push({n:names[0],o:startOct+numOct});
+  return res;
+}
+function normNote(name,oct){
+  const m={'Cb':['B',-1],'Fb':['E',0],'E#':['F',0],'B#':['C',1]};
+  if(m[name]){const[nn,adj]=m[name];return nn+(oct+adj);}
+  return name+oct;
+}
+function dispNote(n){return n.replace('#','♯').replace('b','♭');}
+
+function renderScaleKeys(){
+  const keys=Object.keys(SCALE_SP[scType]);
+  document.getElementById('scale-keys').innerHTML=keys.map(k=>`<button class="sk-btn${k===scKey?' active':''}" onclick="pickScaleKey('${k}')">${k}</button>`).join('');
+}
+function renderScaleNotes(){
+  const names=SCALE_SP[scType][scKey];if(!names)return;
+  const startOct=SCALE_OCT[scType][scKey]||4;
+  const notes=buildNotes(names,startOct,scOct);
+  // bubble size based on count
+  const sz=notes.length>16?38:notes.length>10?42:46;
+  document.getElementById('scale-notes').innerHTML=notes.map((note,i)=>{
+    const ci=i%7,col=NB_COLS[ci];
+    const isRoot=i===0||i===notes.length-1;
+    const brd=isRoot?`border:3px solid ${col.c};`:'' ;
+    return`<div class="nb" id="nb${i}" style="width:${sz}px;height:${sz}px;background:${col.bg};color:${col.c};${brd}" onclick="playNb('${note.n}',${note.o},${i})"><div style="font-size:${sz>40?0.8:0.7}rem;line-height:1.2">${dispNote(note.n)}</div>${scOct>1?`<div style="font-size:0.5rem;opacity:0.65">${note.o}</div>`:''}</div>`;
+  }).join('');
+  const typeName=scType==='major'?'Major ☀️':'Minor 🌙';
+  document.getElementById('scale-title').textContent=`${scKey} ${typeName} — ${scOct} octave${scOct>1?'s':''}`;
+}
+async function playNb(name,oct,i){
+  await Tone.start();
+  const s=new Tone.Synth({oscillator:{type:'triangle'},envelope:{attack:0.04,decay:0.1,sustain:0.5,release:0.5}}).toDestination();
+  try{s.triggerAttackRelease(normNote(name,oct),'4n');}catch(e){}
+  const el=document.getElementById('nb'+i);if(el){el.classList.add('playing');setTimeout(()=>el.classList.remove('playing'),500);}
+  setTimeout(()=>s.dispose(),1000);
+}
+async function playScale(){
+  if(scPlaying)return;
+  await Tone.start();
+  scPlaying=true;scStop=false;
+  document.getElementById('play-btn').style.display='none';
+  document.getElementById('stop-btn').style.display='inline-flex';
+  const names=SCALE_SP[scType][scKey],startOct=SCALE_OCT[scType][scKey]||4;
+  const notes=buildNotes(names,startOct,scOct);
+  scSynth=new Tone.Synth({oscillator:{type:'triangle'},envelope:{attack:0.04,decay:0.1,sustain:0.55,release:0.5}}).toDestination();
+  const seq=[...notes,...notes.slice(1,-1).reverse()];
+  for(let i=0;i<seq.length;i++){
+    if(scStop)break;
+    const ni=i<notes.length?i:notes.length-2-(i-notes.length);
+    document.querySelectorAll('.nb').forEach((el,j)=>el.classList.toggle('playing',j===ni));
+    try{scSynth.triggerAttackRelease(normNote(seq[i].n,seq[i].o),'4n');}catch(e){}
+    await new Promise(r=>setTimeout(r,480));
+  }
+  stopScale();
+}
+function stopScale(){
+  scStop=true;scPlaying=false;scSynth?.dispose();scSynth=null;
+  document.querySelectorAll('.nb').forEach(el=>el.classList.remove('playing'));
+  const pb=document.getElementById('play-btn'),sb=document.getElementById('stop-btn');
+  if(pb)pb.style.display='inline-flex';if(sb)sb.style.display='none';
+}
+
+// ════════════════════════════════════════════════════════
+// PRACTICE — CAMERA
+// ════════════════════════════════════════════════════════
+let camStream=null,camRec=null,camAC=null,camAn=null;
+let pitches=[],captFrame=null,recTmr=null,recSec=0;
+let camStarted=false,isRec=false,inputMode='camera';
+
+function switchInput(mode){
+  inputMode=mode;
+  document.querySelectorAll('.inp-tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&mode==='camera')||(i===1&&mode==='upload')));
+  document.getElementById('cam-section').classList.toggle('hidden',mode!=='camera');
+  document.getElementById('up-section').classList.toggle('hidden',mode!=='upload');
+}
+
+async function handleCamBtn(){
+  if(!camStarted)await startCam();
+  else if(!isRec)startRec();
+  else await stopRec();
+}
+
+async function startCam(){
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    const v=document.getElementById('cam-video');v.srcObject=camStream;v.classList.remove('hidden');
+    document.getElementById('cam-placeholder').classList.add('hidden');
+    camStarted=true;
+    const b=document.getElementById('cam-btn');b.textContent='● Start Recording';b.className='btn btn-green btn-full btn-lg';
+  }catch{alert('Please allow camera and microphone, then try again!');}
+}
+
+function startRec(){
+  pitches=[];captFrame=null;recSec=0;
+  camAC=new AudioContext();camAn=camAC.createAnalyser();camAn.fftSize=2048;
+  camAC.createMediaStreamSource(camStream).connect(camAn);
+  const pb=new Float32Array(2048);
+  const pi=setInterval(()=>{
+    if(!camAn)return;camAn.getFloatTimeDomainData(pb);
+    const p=autoCorr(pb,camAC.sampleRate);if(p>180&&p<1300)pitches.push(p);
+  },150);
+  setTimeout(()=>{
+    const v=document.getElementById('cam-video');
+    if(v&&v.videoWidth>0){const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);captFrame=c.toDataURL('image/jpeg',0.72).split(',')[1];}
+  },2500);
+  camRec=new MediaRecorder(camStream);camRec.start();camRec._pi=pi;
+  recTmr=setInterval(()=>{recSec++;const e=document.getElementById('rec-timer');if(e)e.textContent=`${Math.floor(recSec/60)}:${String(recSec%60).padStart(2,'0')}`;},1000);
+  document.getElementById('rec-badge').style.display='flex';
+  isRec=true;const b=document.getElementById('cam-btn');b.textContent='⏹ Stop & Get Feedback';b.className='btn btn-red btn-full btn-lg';
+}
+
+async function stopRec(){
+  clearInterval(recTmr);clearInterval(camRec?._pi);camRec?.stop();camAC?.close();
+  document.getElementById('rec-badge').style.display='none';isRec=false;
+  const b=document.getElementById('cam-btn');b.textContent='🔄 Record Again';b.className='btn btn-amber btn-full btn-lg';
+  const pts=pitches.filter(p=>p>180&&p<1300),cnt=pts.length;
+  let cons=0;
+  if(cnt>3){const m=pts.reduce((a,b)=>a+b,0)/cnt,sd=Math.sqrt(pts.reduce((a,b)=>a+(b-m)**2,0)/cnt);cons=Math.max(0,Math.min(100,100-(sd/60)*100));}
+  await callGemini(captFrame,cnt,cons,recSec,'camera recording');
+}
+
+// ════════════════════════════════════════════════════════
+// PRACTICE — UPLOAD
+// ════════════════════════════════════════════════════════
+let upFile=null;
+function handleUpload(e){
+  upFile=e.target.files[0];if(!upFile)return;
+  const v=document.getElementById('upload-vid');v.src=URL.createObjectURL(upFile);
+  document.getElementById('upload-area').classList.add('hidden');
+  document.getElementById('vid-preview-wrap').classList.remove('hidden');
+}
+function resetUpload(){
+  upFile=null;document.getElementById('file-in').value='';
+  document.getElementById('upload-vid').src='';
+  document.getElementById('upload-area').classList.remove('hidden');
+  document.getElementById('vid-preview-wrap').classList.add('hidden');
+}
+async function analyzeUpload(){
+  if(!upFile)return;
+  const frame=await extractFrame(upFile);
+  await callGemini(frame,50,70,60,'uploaded video');
+}
+function extractFrame(file){
+  return new Promise(resolve=>{
+    const url=URL.createObjectURL(file),v=document.createElement('video');
+    v.src=url;v.muted=true;v.crossOrigin='anonymous';
+    v.onloadeddata=()=>{v.currentTime=Math.min(2,v.duration*0.2);};
+    v.onseeked=()=>{
+      const c=document.createElement('canvas');c.width=v.videoWidth||640;c.height=v.videoHeight||480;
+      c.getContext('2d').drawImage(v,0,0);URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg',0.75).split(',')[1]);
+    };
+    v.onerror=()=>{URL.revokeObjectURL(url);resolve(null);};
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// GEMINI AI
+// ════════════════════════════════════════════════════════
+async function callGemini(frame,pitchCnt,cons,dur,src){
+  if(!S.gemKey){
+    alert('⚙️ Please add your free Gemini API key first!\n\n1. Tap the ⚙️ button at the top right\n2. Paste your Gemini key\n3. Get a free key at: aistudio.google.com/apikey');
+    return;
+  }
+  const overlay=document.getElementById('analyzing');overlay.classList.add('show');
+  const prof=S.profiles[S.cur];
+  const presence=pitchCnt<5?'very little violin sound':pitchCnt<30?'some violin playing':'good amount of violin playing';
+  const parts=[];
+  if(frame)parts.push({inline_data:{mime_type:'image/jpeg',data:frame}});
+  parts.push({text:`You are a warm, encouraging violin teacher for a young student named "${prof.name}".
+
+Session: ${src}. Audio: ${pitchCnt} pitch samples over ${Math.round(dur)}s, consistency ${cons.toFixed(0)}%, ${presence}.
+${frame?'Assess posture and technique from the image of the student playing violin.':'No visual available.'}
+
+Give kind, age-appropriate, encouraging feedback. Be very positive and motivating for a child.
+
+Respond ONLY with raw JSON — no markdown, no code fences:
+{"stars":4,"posture":"...","violin_hold":"...","bow_hold":"...","intonation":"...","overall":"one warm sentence","positives":["...","..."],"improvements":["...","..."],"encouragement":"fun motivating phrase"}`});
+
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.gemKey}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts}],generationConfig:{temperature:0.7,maxOutputTokens:600}})
+    });
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    let raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+    raw=raw.replace(/```json|```/g,'').trim();
+    const fb=JSON.parse(raw);
+    showFeedback(fb);
+    const di=todayIdx();if(di>=0){setDayStars(S.cur,di,fb.stars||0);renderWeek();}
+  }catch(e){
+    console.error(e);
+    const fb={stars:3.5,posture:'Keep your back straight and comfortable!',violin_hold:'Make sure your chin rests nicely on the chin rest.',bow_hold:'Try to keep your bow arm nice and relaxed.',intonation:'Keep listening carefully to each note as you play.',overall:`Great effort today, ${prof.name}! Every practice makes you better! 🌟`,positives:['Showed up and practised!','Gave it your best effort'],improvements:['Try playing more slowly','Listen to each note carefully'],encouragement:'🎵 Every great violinist started exactly where you are!'};
+    showFeedback(fb);
+    const di=todayIdx();if(di>=0){setDayStars(S.cur,di,3.5);renderWeek();}
+    if(e.message&&e.message.length<200)alert('AI Error: '+e.message+'\n\nCheck your Gemini key in ⚙️ Settings.\nMake sure it is copied correctly from aistudio.google.com/apikey');
+  }
+  overlay.classList.remove('show');
+}
+
+function showFeedback(fb){
+  const card=document.getElementById('feedback-card'),prof=S.profiles[S.cur];
+  document.getElementById('fb-pname').textContent=prof.name;
+  const stars=fb.stars||0;
+  document.getElementById('fb-stars').innerHTML=[1,2,3,4,5].map(i=>`<span class="star-ic ${i<=Math.floor(stars)||(!( i>Math.floor(stars))&&stars%1>=0.5&&i===Math.floor(stars)+1)?'star-full':'star-empty'}">${i<=Math.floor(stars)?'★':stars%1>=0.5&&i===Math.floor(stars)+1?'★':'☆'}</span>`).join('');
+  document.getElementById('fb-score').textContent=`${stars} / 5 stars`;
+  document.getElementById('fb-trophy').textContent=stars>=4.5?'🏆':stars>=3.5?'🌟':stars>=2.5?'⭐':'💪';
+  document.getElementById('fb-overall').textContent=`"${fb.overall||''}"`;
+  document.getElementById('fb-posture').textContent=fb.posture||'';
+  document.getElementById('fb-hold').textContent=fb.violin_hold||'';
+  document.getElementById('fb-bow').textContent=fb.bow_hold||'';
+  document.getElementById('fb-intone').textContent=fb.intonation||'';
+  document.getElementById('fb-pos').innerHTML=(fb.positives||[]).map(p=>`<p>• ${esc(p)}</p>`).join('');
+  document.getElementById('fb-imp').innerHTML=(fb.improvements||[]).map(p=>`<p>• ${esc(p)}</p>`).join('');
+  document.getElementById('fb-enc').textContent=fb.encouragement||'';
+  card.style.display='block';card.classList.add('pop');setTimeout(()=>card.classList.remove('pop'),400);
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ════════════════════════════════════════════════════════
+// WEEKLY DISPLAY
+// ════════════════════════════════════════════════════════
+function renderWeek(){
+  const stars=getWeekStars(S.cur),ti=todayIdx(),total=stars.reduce((a,b)=>a+b,0);
+  document.getElementById('week-days').innerHTML=DAYS.map((d,i)=>{
+    const s=stars[i]||0,isTd=i===ti,sc=Math.round(s);
+    return`<div class="day-cell${isTd?' today':''}"><div class="day-lbl">${d}</div><div class="day-stars">${s>0?'★'.repeat(sc):''}</div>${s>0?`<div class="day-num">${s}★</div>`:`<div style="color:#D1D5DB;font-size:0.65rem;margin-top:2px">–</div>`}</div>`;
+  }).join('');
+  const wt=document.getElementById('week-total');if(wt)wt.textContent=`⭐ ${total.toFixed(1)} total`;
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+function renderAll(){
+  renderProfiles();renderWeek();
+  scType=S.scType||'major';scKey=S.scKey||'D';scOct=S.octaves||1;
+  renderScaleKeys();renderScaleNotes();
+  setOctaves(scOct);
+  if(S.tab)switchTab(S.tab);
+}
+
+loadS();
+if(!S.setupDone){
+  document.getElementById('setup-screen').style.display='flex';
+  setupAv=[...S.setupAvatars];
+}else{
+  document.getElementById('setup-screen').style.display='none';
+  renderAll();
+}
+</script>
+</body>
+</html>
