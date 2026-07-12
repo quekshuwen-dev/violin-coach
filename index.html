@@ -177,6 +177,24 @@ input{outline:none;font-family:inherit;}
 .scale-tip-box{background:#F5F3FF;border-radius:14px;padding:14px;}
 .scale-tip-box p{font-size:0.82rem;color:#4B5563;line-height:1.8;}
 
+/* COUNTDOWN */
+#sc-countdown{display:none;text-align:center;padding:20px 0;}
+#sc-countdown.show{display:block;}
+.cd-num{font-size:5rem;font-weight:900;color:#7C3AED;animation:cdpop 0.9s ease;line-height:1;}
+.cd-label{font-size:0.85rem;color:#9CA3AF;margin-top:4px;font-weight:600;}
+@keyframes cdpop{0%{transform:scale(0.3);opacity:0}50%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+
+/* BPM */
+.bpm-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.bpm-lbl{font-size:0.8rem;font-weight:700;color:#6B7280;flex-shrink:0;}
+.bpm-grid{display:flex;gap:5px;flex-wrap:wrap;}
+.bpm-btn{padding:6px 10px;border-radius:8px;font-weight:700;font-size:0.78rem;transition:all 0.15s;background:#F3F4F6;color:#6B7280;}
+.bpm-btn.active{background:#7C3AED;color:white;}
+.metro-toggle{display:flex;align-items:center;gap:6px;margin-bottom:12px;}
+.metro-toggle label{font-size:0.8rem;font-weight:600;color:#6B7280;cursor:pointer;}
+.metro-cb{width:18px;height:18px;accent-color:#7C3AED;cursor:pointer;}
+.minor-label{font-size:0.72rem;color:#9CA3AF;text-align:center;margin-bottom:8px;font-style:italic;}
+
 /* MISC */
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
@@ -405,9 +423,26 @@ input{outline:none;font-family:inherit;}
       </div>
 
       <div id="scale-title"></div>
+      <div class="minor-label hidden" id="minor-label">⬆ Melodic minor ascending · ⬇ Natural minor descending (ABRSM style)</div>
       <div id="scale-notes"></div>
 
-      <div class="scale-play-row">
+      <!-- BPM selector -->
+      <div class="bpm-row">
+        <span class="bpm-lbl">🎵 Tempo:</span>
+        <div class="bpm-grid" id="bpm-grid"></div>
+      </div>
+      <div class="metro-toggle">
+        <input type="checkbox" class="metro-cb" id="metro-cb" checked>
+        <label for="metro-cb">🥁 Metronome click during playback</label>
+      </div>
+
+      <!-- Countdown area -->
+      <div id="sc-countdown">
+        <div class="cd-num" id="cd-num">5</div>
+        <div class="cd-label">Get ready...</div>
+      </div>
+
+      <div class="scale-play-row" id="scale-play-row">
         <button class="btn btn-green btn-full" id="play-btn" onclick="playScale()">▶ Play Scale Up &amp; Down</button>
         <button class="btn btn-red" id="stop-btn" style="display:none" onclick="stopScale()">⏹ Stop</button>
       </div>
@@ -415,11 +450,12 @@ input{outline:none;font-family:inherit;}
     </div>
     <div class="scale-tip-box">
       <p><b style="color:#7C3AED">💡 How to practise scales:</b></p>
-      <p>1️⃣ Press Play and listen carefully first</p>
-      <p>2️⃣ Try to match each note on your violin</p>
-      <p>3️⃣ Play slowly — one note at a time</p>
-      <p>4️⃣ Scales go up and then back down ⬆️⬇️</p>
+      <p>1️⃣ Choose your tempo (start slow at 40–60 BPM)</p>
+      <p>2️⃣ Press Play — a 5-second countdown lets you get ready</p>
+      <p>3️⃣ Listen carefully, then try matching each note</p>
+      <p>4️⃣ Scales go up then back down ⬆️⬇️</p>
       <p>5️⃣ Major = bright &amp; happy ☀️ | Minor = deep &amp; mysterious 🌙</p>
+      <p>6️⃣ Minor scales use <b>melodic minor</b> going up and <b>natural minor</b> coming down (exam style!)</p>
     </div>
   </div><!-- end scales-tab -->
 
@@ -449,28 +485,54 @@ const VIOLIN_STRINGS = [{name:'G',freq:196},{name:'D',freq:293.66},{name:'A',fre
 const DAYS = ['Mon','Tue','Wed','Thu','Fri'];
 const AVATARS = ['🧒','👧','🧒‍♀️','🎻','🌟','🎵','🎶','🦋','🌈','🐰','🦊','🐬','🎀','🌸','🎠'];
 
-const SCALE_SP = {
-  major:{
-    'C':['C','D','E','F','G','A','B'],'G':['G','A','B','C','D','E','F#'],
-    'D':['D','E','F#','G','A','B','C#'],'A':['A','B','C#','D','E','F#','G#'],
-    'E':['E','F#','G#','A','B','C#','D#'],'B':['B','C#','D#','E','F#','G#','A#'],
-    'Gb':['Gb','Ab','Bb','Cb','Db','Eb','F'],'Db':['Db','Eb','F','Gb','Ab','Bb','C'],
-    'Ab':['Ab','Bb','C','Db','Eb','F','G'],'Eb':['Eb','F','G','Ab','Bb','C','D'],
-    'Bb':['Bb','C','D','Eb','F','G','A'],'F':['F','G','A','Bb','C','D','E']
-  },
-  minor:{
-    'A':['A','B','C','D','E','F','G'],'E':['E','F#','G','A','B','C','D'],
-    'B':['B','C#','D','E','F#','G','A'],'F#':['F#','G#','A','B','C#','D','E'],
-    'C#':['C#','D#','E','F#','G#','A','B'],'G#':['G#','A#','B','C#','D#','E','F#'],
-    'D':['D','E','F','G','A','Bb','C'],'G':['G','A','Bb','C','D','Eb','F'],
-    'C':['C','D','Eb','F','G','Ab','Bb'],'F':['F','G','Ab','Bb','C','Db','Eb'],
-    'Bb':['Bb','C','Db','Eb','F','Gb','Ab'],'Eb':['Eb','F','Gb','Ab','Bb','Cb','Db']
-  }
+// ═══ EXPLICIT 3-OCTAVE SCALES (all verified correct) ═══
+// Major: all 12 keys, 22 notes each (tonic to tonic, 3 octaves)
+const MAJOR_3 = {
+  'G':["G3","A3","B3","C4","D4","E4","F#4","G4","A4","B4","C5","D5","E5","F#5","G5","A5","B5","C6","D6","E6","F#6","G6"],
+  'Ab':["Ab3","Bb3","C4","Db4","Eb4","F4","G4","Ab4","Bb4","C5","Db5","Eb5","F5","G5","Ab5","Bb5","C6","Db6","Eb6","F6","G6","Ab6"],
+  'A':["A3","B3","C#4","D4","E4","F#4","G#4","A4","B4","C#5","D5","E5","F#5","G#5","A5","B5","C#6","D6","E6","F#6","G#6","A6"],
+  'Bb':["Bb3","C4","D4","Eb4","F4","G4","A4","Bb4","C5","D5","Eb5","F5","G5","A5","Bb5","C6","D6","Eb6","F6","G6","A6","Bb6"],
+  'B':["B3","C#4","D#4","E4","F#4","G#4","A#4","B4","C#5","D#5","E5","F#5","G#5","A#5","B5","C#6","D#6","E6","F#6","G#6","A#6","B6"],
+  'C':["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5","A5","B5","C6","D6","E6","F6","G6","A6","B6","C7"],
+  'Db':["Db4","Eb4","F4","Gb4","Ab4","Bb4","C5","Db5","Eb5","F5","Gb5","Ab5","Bb5","C6","Db6","Eb6","F6","Gb6","Ab6","Bb6","C7","Db7"],
+  'D':["D4","E4","F#4","G4","A4","B4","C#5","D5","E5","F#5","G5","A5","B5","C#6","D6","E6","F#6","G6","A6","B6","C#7","D7"],
+  'Eb':["Eb4","F4","G4","Ab4","Bb4","C5","D5","Eb5","F5","G5","Ab5","Bb5","C6","D6","Eb6","F6","G6","Ab6","Bb6","C7","D7","Eb7"],
+  'E':["E4","F#4","G#4","A4","B4","C#5","D#5","E5","F#5","G#5","A5","B5","C#6","D#6","E6","F#6","G#6","A6","B6","C#7","D#7","E7"],
+  'F':["F4","G4","A4","Bb4","C5","D5","E5","F5","G5","A5","Bb5","C6","D6","E6","F6","G6","A6","Bb6","C7","D7","E7","F7"],
+  'F#':["F#4","G#4","A#4","B4","C#5","D#5","E#5","F#5","G#5","A#5","B5","C#6","D#6","E#6","F#6","G#6","A#6","B6","C#7","D#7","E#7","F#7"]
 };
-const SCALE_OCT = {
-  major:{'C':4,'G':3,'D':4,'A':3,'E':4,'B':3,'Gb':4,'Db':4,'Ab':3,'Eb':4,'Bb':3,'F':4},
-  minor:{'A':3,'E':4,'B':3,'F#':4,'C#':4,'G#':3,'D':4,'G':3,'C':4,'F':4,'Bb':3,'Eb':4}
+// Melodic minor ascending (raised 6th & 7th) — ABRSM exam style
+const MINOR_ASC_3 = {
+  'A':["A3","B3","C4","D4","E4","F#4","G#4","A4","B4","C5","D5","E5","F#5","G#5","A5","B5","C6","D6","E6","F#6","G#6","A6"],
+  'Bb':["Bb3","C4","Db4","Eb4","F4","G4","A4","Bb4","C5","Db5","Eb5","F5","G5","A5","Bb5","C6","Db6","Eb6","F6","G6","A6","Bb6"],
+  'B':["B3","C#4","D4","E4","F#4","G#4","A#4","B4","C#5","D5","E5","F#5","G#5","A#5","B5","C#6","D6","E6","F#6","G#6","A#6","B6"],
+  'C':["C4","D4","Eb4","F4","G4","A4","B4","C5","D5","Eb5","F5","G5","A5","B5","C6","D6","Eb6","F6","G6","A6","B6","C7"],
+  'C#':["C#4","D#4","E4","F#4","G#4","A#4","B#4","C#5","D#5","E5","F#5","G#5","A#5","B#5","C#6","D#6","E6","F#6","G#6","A#6","B#6","C#7"],
+  'D':["D4","E4","F4","G4","A4","B4","C#5","D5","E5","F5","G5","A5","B5","C#6","D6","E6","F6","G6","A6","B6","C#7","D7"],
+  'Eb':["Eb4","F4","Gb4","Ab4","Bb4","C5","D5","Eb5","F5","Gb5","Ab5","Bb5","C6","D6","Eb6","F6","Gb6","Ab6","Bb6","C7","D7","Eb7"],
+  'E':["E4","F#4","G4","A4","B4","C#5","D#5","E5","F#5","G5","A5","B5","C#6","D#6","E6","F#6","G6","A6","B6","C#7","D#7","E7"],
+  'F':["F4","G4","Ab4","Bb4","C5","D5","E5","F5","G5","Ab5","Bb5","C6","D6","E6","F6","G6","Ab6","Bb6","C7","D7","E7","F7"],
+  'F#':["F#4","G#4","A4","B4","C#5","D#5","E#5","F#5","G#5","A5","B5","C#6","D#6","E#6","F#6","G#6","A6","B6","C#7","D#7","E#7","F#7"],
+  'G':["G3","A3","Bb3","C4","D4","E4","F#4","G4","A4","Bb4","C5","D5","E5","F#5","G5","A5","Bb5","C6","D6","E6","F#6","G6"],
+  'G#':["G#3","A#3","B3","C#4","D#4","E#4","G4","G#4","A#4","B4","C#5","D#5","E#5","G5","G#5","A#5","B5","C#6","D#6","E#6","G6","G#6"]
 };
+// Natural minor descending — ABRSM exam style
+const MINOR_DESC_3 = {
+  'A':["A6","G6","F6","E6","D6","C6","B5","A5","G5","F5","E5","D5","C5","B4","A4","G4","F4","E4","D4","C4","B3","A3"],
+  'Bb':["Bb6","Ab6","Gb6","F6","Eb6","Db6","C6","Bb5","Ab5","Gb5","F5","Eb5","Db5","C5","Bb4","Ab4","Gb4","F4","Eb4","Db4","C4","Bb3"],
+  'B':["B6","A6","G6","F#6","E6","D6","C#6","B5","A5","G5","F#5","E5","D5","C#5","B4","A4","G4","F#4","E4","D4","C#4","B3"],
+  'C':["C7","Bb6","Ab6","G6","F6","Eb6","D6","C6","Bb5","Ab5","G5","F5","Eb5","D5","C5","Bb4","Ab4","G4","F4","Eb4","D4","C4"],
+  'C#':["C#7","B6","A6","G#6","F#6","E6","D#6","C#6","B5","A5","G#5","F#5","E5","D#5","C#5","B4","A4","G#4","F#4","E4","D#4","C#4"],
+  'D':["D7","C7","Bb6","A6","G6","F6","E6","D6","C6","Bb5","A5","G5","F5","E5","D5","C5","Bb4","A4","G4","F4","E4","D4"],
+  'Eb':["Eb7","Db7","Cb7","Bb6","Ab6","Gb6","F6","Eb6","Db6","Cb6","Bb5","Ab5","Gb5","F5","Eb5","Db5","Cb5","Bb4","Ab4","Gb4","F4","Eb4"],
+  'E':["E7","D7","C7","B6","A6","G6","F#6","E6","D6","C6","B5","A5","G5","F#5","E5","D5","C5","B4","A4","G4","F#4","E4"],
+  'F':["F7","Eb7","Db7","C7","Bb6","Ab6","G6","F6","Eb6","Db6","C6","Bb5","Ab5","G5","F5","Eb5","Db5","C5","Bb4","Ab4","G4","F4"],
+  'F#':["F#7","E7","D7","C#7","B6","A6","G#6","F#6","E6","D6","C#6","B5","A5","G#5","F#5","E5","D5","C#5","B4","A4","G#4","F#4"],
+  'G':["G6","F6","Eb6","D6","C6","Bb5","A5","G5","F5","Eb5","D5","C5","Bb4","A4","G4","F4","Eb4","D4","C4","Bb3","A3","G3"],
+  'G#':["G#6","F#6","E6","D#6","C#6","B5","A#5","G#5","F#5","E5","D#5","C#5","B4","A#4","G#4","F#4","E4","D#4","C#4","B3","A#3","G#3"]
+};
+// BPM options
+const BPM_OPTIONS = [40,50,60,70,80,90,100,120];
 // Rainbow colours for note bubbles (7 degrees)
 const NB_COLS = [
   {bg:'#FEE2E2',c:'#991B1B'},{bg:'#FEF3C7',c:'#92400E'},{bg:'#D1FAE5',c:'#064E3B'},
@@ -488,7 +550,7 @@ let S = {
     {name:'Player 3',avatar:'🌟',stars:{}}
   ],
   cur:0, gemKey:'', tab:'practice',
-  scType:'major', scKey:'D', octaves:1, setupDone:false,
+  scType:'major', scKey:'G', octaves:1, scBpm:60, setupDone:false,
   setupAvatars:['🧒','👧','🌟']
 };
 
@@ -655,90 +717,201 @@ function updateTuner(freq){
 // ════════════════════════════════════════════════════════
 // SCALES
 // ════════════════════════════════════════════════════════
-let scType='major',scKey='D',scOct=1,scPlaying=false,scSynth=null,scStop=false;
+let scType='major',scKey='G',scOct=1,scBpm=60,scPlaying=false,scSynth=null,scStop=false,scMetro=true,metroSynth=null;
 
+// ─── Normalize note for Tone.js playback ────────────────
+function normNote(noteStr){
+  // noteStr like "Ab4", "F#5", "Cb7", "B#4", "E#5"
+  const m=noteStr.match(/^([A-G][#b]*)(\d+)$/);
+  if(!m)return noteStr;
+  let[,name,oct]=m; oct=parseInt(oct);
+  const map={'Cb':['B',-1],'Fb':['E',0],'E#':['F',0],'B#':['C',1]};
+  if(map[name]){const[nn,adj]=map[name];return nn+(oct+adj);}
+  return name+oct;
+}
+function dispNote(n){
+  // Parse "Ab4" -> display "A♭" (no octave) or "A♭4" (with octave)
+  const m=n.match(/^([A-G])([#b]*)(\d+)$/);
+  if(!m)return n;
+  const acc=m[2].replace(/#/g,'♯').replace(/b/g,'♭');
+  return m[1]+acc;
+}
+function noteOctave(n){const m=n.match(/(\d+)$/);return m?parseInt(m[1]):4;}
+
+// ─── Get scale notes for current octave setting ─────────
+function getScaleNotes(){
+  if(scType==='major'){
+    const full=MAJOR_3[scKey];if(!full)return[];
+    if(scOct===3)return full;
+    if(scOct===2)return full.slice(0,15);
+    return full.slice(0,8);
+  }else{
+    // Minor: ascending = melodic, descending = natural
+    const ascFull=MINOR_ASC_3[scKey];if(!ascFull)return[];
+    if(scOct===3)return ascFull;
+    if(scOct===2)return ascFull.slice(0,15);
+    return ascFull.slice(0,8);
+  }
+}
+function getDescNotes(){
+  if(scType==='major'){
+    // Major descending = reverse of ascending
+    const asc=getScaleNotes();
+    return[...asc].reverse();
+  }else{
+    // Minor descending = natural minor (different notes!)
+    const descFull=MINOR_DESC_3[scKey];if(!descFull)return[];
+    if(scOct===3)return descFull;
+    if(scOct===2)return descFull.slice(descFull.length-15);
+    return descFull.slice(descFull.length-8);
+  }
+}
+
+// ─── UI updates ─────────────────────────────────────────
 function setScaleType(t){
-  scType=t; scKey=Object.keys(SCALE_SP[t])[0]; S.scType=t; S.scKey=scKey; saveS();
+  scType=t;
+  const keys=Object.keys(t==='major'?MAJOR_3:MINOR_ASC_3);
+  if(!keys.includes(scKey))scKey=keys[0];
+  S.scType=t;S.scKey=scKey;saveS();
   document.querySelectorAll('.type-btn').forEach(el=>el.classList.toggle('active',el.classList.contains(t)));
-  stopScale(); renderScaleKeys(); renderScaleNotes();
+  stopScale();renderScaleKeys();renderScaleNotes();
 }
 function pickScaleKey(k){scKey=k;S.scKey=k;saveS();stopScale();renderScaleKeys();renderScaleNotes();}
 function setOctaves(n){
   scOct=n;S.octaves=n;saveS();
   [1,2,3].forEach(i=>{const el=document.getElementById('oct'+i);if(el)el.classList.toggle('active',i===n);});
-  stopScale(); renderScaleNotes();
+  stopScale();renderScaleNotes();
+}
+function setBpm(b){
+  scBpm=b;S.scBpm=b;saveS();
+  document.querySelectorAll('.bpm-btn').forEach(el=>el.classList.toggle('active',parseInt(el.dataset.bpm)===b));
 }
 
-function buildNotes(names,startOct,numOct){
-  const res=[];let oct=startOct;
-  for(let o=0;o<numOct;o++){
-    for(let i=0;i<names.length;i++){
-      const semi=NOTE_ST[names[i]]??0;
-      const prev=i>0?names[i-1]:(o>0?names[names.length-1]:null);
-      if(prev!==null){const ps=NOTE_ST[prev]??0;if(semi<=ps)oct++;}
-      res.push({n:names[i],o:oct});
-    }
-  }
-  res.push({n:names[0],o:startOct+numOct});
-  return res;
+function renderBpmGrid(){
+  document.getElementById('bpm-grid').innerHTML=BPM_OPTIONS.map(b=>
+    `<button class="bpm-btn${b===scBpm?' active':''}" data-bpm="${b}" onclick="setBpm(${b})">${b}</button>`
+  ).join('');
 }
-function normNote(name,oct){
-  const m={'Cb':['B',-1],'Fb':['E',0],'E#':['F',0],'B#':['C',1]};
-  if(m[name]){const[nn,adj]=m[name];return nn+(oct+adj);}
-  return name+oct;
-}
-function dispNote(n){return n.replace('#','♯').replace('b','♭');}
 
 function renderScaleKeys(){
-  const keys=Object.keys(SCALE_SP[scType]);
-  document.getElementById('scale-keys').innerHTML=keys.map(k=>`<button class="sk-btn${k===scKey?' active':''}" onclick="pickScaleKey('${k}')">${k}</button>`).join('');
+  const keys=Object.keys(scType==='major'?MAJOR_3:MINOR_ASC_3);
+  document.getElementById('scale-keys').innerHTML=keys.map(k=>
+    `<button class="sk-btn${k===scKey?' active':''}" onclick="pickScaleKey('${k}')">${k}</button>`
+  ).join('');
 }
+
 function renderScaleNotes(){
-  const names=SCALE_SP[scType][scKey];if(!names)return;
-  const startOct=SCALE_OCT[scType][scKey]||4;
-  const notes=buildNotes(names,startOct,scOct);
-  // bubble size based on count
-  const sz=notes.length>16?38:notes.length>10?42:46;
+  const notes=getScaleNotes();if(!notes.length)return;
+  const sz=notes.length>16?36:notes.length>10?42:46;
   document.getElementById('scale-notes').innerHTML=notes.map((note,i)=>{
     const ci=i%7,col=NB_COLS[ci];
     const isRoot=i===0||i===notes.length-1;
-    const brd=isRoot?`border:3px solid ${col.c};`:'' ;
-    return`<div class="nb" id="nb${i}" style="width:${sz}px;height:${sz}px;background:${col.bg};color:${col.c};${brd}" onclick="playNb('${note.n}',${note.o},${i})"><div style="font-size:${sz>40?0.8:0.7}rem;line-height:1.2">${dispNote(note.n)}</div>${scOct>1?`<div style="font-size:0.5rem;opacity:0.65">${note.o}</div>`:''}</div>`;
+    const brd=isRoot?`border:3px solid ${col.c};`:'';
+    const oct=noteOctave(note);
+    return`<div class="nb" id="nb${i}" style="width:${sz}px;height:${sz}px;background:${col.bg};color:${col.c};${brd}" onclick="playNb('${note}',${i})"><div style="font-size:${sz>40?0.8:0.68}rem;line-height:1.2">${dispNote(note)}</div>${scOct>1?`<div style="font-size:0.5rem;opacity:0.65">${oct}</div>`:''}</div>`;
   }).join('');
-  const typeName=scType==='major'?'Major ☀️':'Minor 🌙';
+  const typeName=scType==='major'?'Major ☀️':'Melodic Minor 🌙';
   document.getElementById('scale-title').textContent=`${scKey} ${typeName} — ${scOct} octave${scOct>1?'s':''}`;
+  const ml=document.getElementById('minor-label');
+  if(ml)ml.classList.toggle('hidden',scType!=='minor');
 }
-async function playNb(name,oct,i){
+
+// ─── Play single note ───────────────────────────────────
+function makeViolinSynth(){
+  return new Tone.Synth({
+    oscillator:{type:'fatsawtooth',count:3,spread:12},
+    envelope:{attack:0.12,decay:0.2,sustain:0.7,release:0.8}
+  }).toDestination();
+}
+
+async function playNb(noteStr,i){
   await Tone.start();
-  const s=new Tone.Synth({oscillator:{type:'triangle'},envelope:{attack:0.04,decay:0.1,sustain:0.5,release:0.5}}).toDestination();
-  try{s.triggerAttackRelease(normNote(name,oct),'4n');}catch(e){}
+  const s=makeViolinSynth();
+  try{s.triggerAttackRelease(normNote(noteStr),'4n');}catch(e){console.warn(e);}
   const el=document.getElementById('nb'+i);if(el){el.classList.add('playing');setTimeout(()=>el.classList.remove('playing'),500);}
-  setTimeout(()=>s.dispose(),1000);
+  setTimeout(()=>s.dispose(),1500);
 }
+
+// ─── Countdown + Play ───────────────────────────────────
 async function playScale(){
   if(scPlaying)return;
   await Tone.start();
   scPlaying=true;scStop=false;
+  scMetro=document.getElementById('metro-cb').checked;
+
+  // Show countdown, hide play button
   document.getElementById('play-btn').style.display='none';
   document.getElementById('stop-btn').style.display='inline-flex';
-  const names=SCALE_SP[scType][scKey],startOct=SCALE_OCT[scType][scKey]||4;
-  const notes=buildNotes(names,startOct,scOct);
-  scSynth=new Tone.Synth({oscillator:{type:'triangle'},envelope:{attack:0.04,decay:0.1,sustain:0.55,release:0.5}}).toDestination();
-  const seq=[...notes,...notes.slice(1,-1).reverse()];
-  for(let i=0;i<seq.length;i++){
+  const cdEl=document.getElementById('sc-countdown');
+  const cdNum=document.getElementById('cd-num');
+  cdEl.classList.add('show');
+
+  // Create metronome click synth
+  metroSynth=new Tone.MembraneSynth({pitchDecay:0.01,octaves:6,envelope:{attack:0.001,decay:0.1,sustain:0,release:0.05}}).toDestination();
+  metroSynth.volume.value=-8;
+
+  const beatMs=60000/scBpm;
+
+  // 5-second countdown with metronome beats
+  for(let c=5;c>=1;c--){
     if(scStop)break;
-    const ni=i<notes.length?i:notes.length-2-(i-notes.length);
-    document.querySelectorAll('.nb').forEach((el,j)=>el.classList.toggle('playing',j===ni));
-    try{scSynth.triggerAttackRelease(normNote(seq[i].n,seq[i].o),'4n');}catch(e){}
-    await new Promise(r=>setTimeout(r,480));
+    cdNum.textContent=c;
+    cdNum.style.animation='none';void cdNum.offsetWidth;cdNum.style.animation='cdpop 0.9s ease';
+    if(scMetro)try{metroSynth.triggerAttackRelease('C2','32n');}catch(e){}
+    await new Promise(r=>setTimeout(r,1000));
+  }
+  cdEl.classList.remove('show');
+  if(scStop){stopScale();return;}
+
+  // Build full sequence: ascending then descending
+  const ascNotes=getScaleNotes();
+  const descNotes=getDescNotes();
+  // Full sequence: ascending (all notes) + descending (skip first note to avoid doubling top)
+  const fullSeq=[...ascNotes,...descNotes.slice(1)];
+
+  // Map display indices for highlighting
+  // Ascending notes map to bubble indices 0..N-1
+  // Descending notes map backwards (for major) or show which bubble to highlight
+  const ascLen=ascNotes.length;
+
+  scSynth=makeViolinSynth();
+  // Note duration: slightly less than beat for legato feel
+  const noteDur=Math.max(0.15,(beatMs/1000)*0.85);
+
+  for(let i=0;i<fullSeq.length;i++){
+    if(scStop)break;
+
+    // Highlight the correct bubble
+    let hlIdx;
+    if(i<ascLen){
+      hlIdx=i;
+    }else{
+      // Descending: for major, ascending reversed so index maps back
+      // For minor, descending notes differ from ascending, so find closest bubble or map by position
+      hlIdx=ascLen-1-(i-ascLen+1);
+      if(hlIdx<0)hlIdx=0;
+    }
+    document.querySelectorAll('.nb').forEach((el,j)=>el.classList.toggle('playing',j===hlIdx));
+
+    // Metronome click
+    if(scMetro)try{metroSynth.triggerAttackRelease('C2','32n');}catch(e){}
+
+    // Play note
+    try{scSynth.triggerAttackRelease(normNote(fullSeq[i]),noteDur);}catch(e){console.warn('Note error:',fullSeq[i],e);}
+
+    await new Promise(r=>setTimeout(r,beatMs));
   }
   stopScale();
 }
+
 function stopScale(){
-  scStop=true;scPlaying=false;scSynth?.dispose();scSynth=null;
+  scStop=true;scPlaying=false;
+  scSynth?.dispose();scSynth=null;
+  metroSynth?.dispose();metroSynth=null;
   document.querySelectorAll('.nb').forEach(el=>el.classList.remove('playing'));
   const pb=document.getElementById('play-btn'),sb=document.getElementById('stop-btn');
   if(pb)pb.style.display='inline-flex';if(sb)sb.style.display='none';
+  const cd=document.getElementById('sc-countdown');if(cd)cd.classList.remove('show');
 }
 
 // ════════════════════════════════════════════════════════
@@ -916,8 +1089,8 @@ function renderWeek(){
 // ════════════════════════════════════════════════════════
 function renderAll(){
   renderProfiles();renderWeek();
-  scType=S.scType||'major';scKey=S.scKey||'D';scOct=S.octaves||1;
-  renderScaleKeys();renderScaleNotes();
+  scType=S.scType||'major';scKey=S.scKey||'G';scOct=S.octaves||1;scBpm=S.scBpm||60;
+  renderBpmGrid();renderScaleKeys();renderScaleNotes();
   setOctaves(scOct);
   if(S.tab)switchTab(S.tab);
 }
