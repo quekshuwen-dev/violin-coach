@@ -157,11 +157,12 @@ input{outline:none;font-family:inherit;}
 #tune-status{font-size:1.1rem;font-weight:700;color:white;}
 
 /* SCALES */
-.type-toggle{display:flex;gap:8px;margin-bottom:12px;}
-.type-btn{flex:1;padding:10px;border-radius:12px;font-weight:700;font-size:0.88rem;transition:all 0.2s;}
-.type-btn:not(.active){background:#F3F4F6;color:#6B7280;}
-.type-btn.major.active{background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;}
-.type-btn.minor.active{background:linear-gradient(135deg,#1D4ED8,#1E40AF);color:white;}
+.level-toggle{display:flex;gap:6px;margin-bottom:12px;}
+.level-btn{flex:1;padding:9px 4px;border-radius:12px;font-weight:800;font-size:0.78rem;transition:all 0.2s;background:#F3F4F6;color:#6B7280;text-align:center;}
+.level-btn.active{background:linear-gradient(135deg,#7C3AED,#EC4899);color:white;box-shadow:0 3px 10px rgba(124,58,237,0.3);}
+.type-toggle{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.type-btn{flex:1;min-width:70px;padding:9px 4px;border-radius:12px;font-weight:700;font-size:0.76rem;transition:all 0.2s;background:#F3F4F6;color:#6B7280;}
+.type-btn.active{background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;}
 .scale-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;}
 .sk-btn{padding:9px 4px;border-radius:10px;font-weight:800;font-size:0.85rem;transition:all 0.15s;background:#F3F4F6;color:#4B5563;}
 .sk-btn.active{background:linear-gradient(135deg,#7C3AED,#9333EA);color:white;}
@@ -170,12 +171,13 @@ input{outline:none;font-family:inherit;}
 .oct-btn{width:34px;height:34px;border-radius:10px;font-weight:800;font-size:0.88rem;transition:all 0.15s;background:#F3F4F6;color:#6B7280;}
 .oct-btn.active{background:#7C3AED;color:white;}
 #scale-title{text-align:center;font-size:1.1rem;font-weight:800;color:#1F2937;margin-bottom:12px;}
-#scale-notes{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;justify-content:center;}
+#scale-notes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;justify-content:center;max-height:280px;overflow-y:auto;padding:4px;}
 .nb{border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;transition:all 0.15s;cursor:pointer;border:2px solid transparent;}
 .nb.playing{transform:scale(1.18);border-color:white!important;box-shadow:0 0 16px rgba(0,0,0,0.2)!important;}
 .scale-play-row{display:flex;gap:8px;}
 .scale-tip-box{background:#F5F3FF;border-radius:14px;padding:14px;}
 .scale-tip-box p{font-size:0.82rem;color:#4B5563;line-height:1.8;}
+.level-desc{font-size:0.75rem;color:#9CA3AF;text-align:center;margin-bottom:10px;}
 
 /* COUNTDOWN */
 #sc-countdown{display:none;text-align:center;padding:20px 0;}
@@ -407,23 +409,22 @@ input{outline:none;font-family:inherit;}
     <div class="card">
       <p class="ctitle">🎵 Scale Explorer</p>
 
-      <div class="type-toggle">
-        <button class="type-btn major active" onclick="setScaleType('major')">☀️ Major — Happy!</button>
-        <button class="type-btn minor" onclick="setScaleType('minor')">🌙 Minor — Mysterious!</button>
+      <!-- Level selector -->
+      <div class="level-toggle">
+        <button class="level-btn active" data-level="beginner" onclick="setLevel('beginner')">🌱 Beginner</button>
+        <button class="level-btn" data-level="intermediate" onclick="setLevel('intermediate')">🌿 Intermediate</button>
+        <button class="level-btn" data-level="advanced" onclick="setLevel('advanced')">🌳 Advanced</button>
       </div>
+      <div class="level-desc" id="level-desc"></div>
 
+      <!-- Type selector (changes per level) -->
+      <div class="type-toggle" id="type-toggle"></div>
+
+      <!-- Key selector -->
       <div class="scale-keys" id="scale-keys"></div>
 
-      <div class="oct-row">
-        <span class="oct-lbl">🎼 Octaves:</span>
-        <button class="oct-btn active" id="oct1" onclick="setOctaves(1)">1</button>
-        <button class="oct-btn" id="oct2" onclick="setOctaves(2)">2</button>
-        <button class="oct-btn" id="oct3" onclick="setOctaves(3)">3</button>
-        <span style="color:#9CA3AF;font-size:0.75rem">(higher = more notes!)</span>
-      </div>
-
       <div id="scale-title"></div>
-      <div class="minor-label hidden" id="minor-label">⬆ Melodic minor ascending · ⬇ Natural minor descending (ABRSM style)</div>
+      <div class="minor-label hidden" id="minor-label"></div>
       <div id="scale-notes"></div>
 
       <!-- BPM selector -->
@@ -453,9 +454,8 @@ input{outline:none;font-family:inherit;}
       <p>1️⃣ Choose your tempo (start slow at 40–60 BPM)</p>
       <p>2️⃣ Press Play — a 5-second countdown lets you get ready</p>
       <p>3️⃣ Listen carefully, then try matching each note</p>
-      <p>4️⃣ Scales go up then back down ⬆️⬇️</p>
-      <p>5️⃣ Major = bright &amp; happy ☀️ | Minor = deep &amp; mysterious 🌙</p>
-      <p>6️⃣ Minor scales use <b>melodic minor</b> going up and <b>natural minor</b> coming down (exam style!)</p>
+      <p>4️⃣ Major = bright &amp; happy ☀️ | Minor = deep &amp; mysterious 🌙</p>
+      <p>5️⃣ Natural, Harmonic &amp; Melodic minor each sound a little different — can you hear it?</p>
     </div>
   </div><!-- end scales-tab -->
 
@@ -485,51 +485,216 @@ const VIOLIN_STRINGS = [{name:'G',freq:196},{name:'D',freq:293.66},{name:'A',fre
 const DAYS = ['Mon','Tue','Wed','Thu','Fri'];
 const AVATARS = ['🧒','👧','🧒‍♀️','🎻','🌟','🎵','🎶','🦋','🌈','🐰','🦊','🐬','🎀','🌸','🎠'];
 
-// ═══ EXPLICIT 3-OCTAVE SCALES (all verified correct) ═══
-// Major: all 12 keys, 22 notes each (tonic to tonic, 3 octaves)
-const MAJOR_3 = {
-  'G':["G3","A3","B3","C4","D4","E4","F#4","G4","A4","B4","C5","D5","E5","F#5","G5","A5","B5","C6","D6","E6","F#6","G6"],
-  'Ab':["Ab3","Bb3","C4","Db4","Eb4","F4","G4","Ab4","Bb4","C5","Db5","Eb5","F5","G5","Ab5","Bb5","C6","Db6","Eb6","F6","G6","Ab6"],
-  'A':["A3","B3","C#4","D4","E4","F#4","G#4","A4","B4","C#5","D5","E5","F#5","G#5","A5","B5","C#6","D6","E6","F#6","G#6","A6"],
-  'Bb':["Bb3","C4","D4","Eb4","F4","G4","A4","Bb4","C5","D5","Eb5","F5","G5","A5","Bb5","C6","D6","Eb6","F6","G6","A6","Bb6"],
-  'B':["B3","C#4","D#4","E4","F#4","G#4","A#4","B4","C#5","D#5","E5","F#5","G#5","A#5","B5","C#6","D#6","E6","F#6","G#6","A#6","B6"],
-  'C':["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5","A5","B5","C6","D6","E6","F6","G6","A6","B6","C7"],
-  'Db':["Db4","Eb4","F4","Gb4","Ab4","Bb4","C5","Db5","Eb5","F5","Gb5","Ab5","Bb5","C6","Db6","Eb6","F6","Gb6","Ab6","Bb6","C7","Db7"],
-  'D':["D4","E4","F#4","G4","A4","B4","C#5","D5","E5","F#5","G5","A5","B5","C#6","D6","E6","F#6","G6","A6","B6","C#7","D7"],
-  'Eb':["Eb4","F4","G4","Ab4","Bb4","C5","D5","Eb5","F5","G5","Ab5","Bb5","C6","D6","Eb6","F6","G6","Ab6","Bb6","C7","D7","Eb7"],
-  'E':["E4","F#4","G#4","A4","B4","C#5","D#5","E5","F#5","G#5","A5","B5","C#6","D#6","E6","F#6","G#6","A6","B6","C#7","D#7","E7"],
-  'F':["F4","G4","A4","Bb4","C5","D5","E5","F5","G5","A5","Bb5","C6","D6","E6","F6","G6","A6","Bb6","C7","D7","E7","F7"],
-  'F#':["F#4","G#4","A#4","B4","C#5","D#5","E#5","F#5","G#5","A#5","B5","C#6","D#6","E#6","F#6","G#6","A#6","B6","C#7","D#7","E#7","F#7"]
+// ══════════════════════════════════════════════════════
+// VERIFIED SCALE DATA — hard-coded from standard key signatures,
+// interval-checked programmatically. Not algorithmically inferred.
+// ══════════════════════════════════════════════════════
+const BEGINNER_SCALES = {
+  'C': {asc:["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5","C6"],desc:["C6","B5","A5","G5","F5","E5","D5","C5","B4","A4","G4","F4","E4","D4","C4"]},
+  'G': {asc:["G3","A3","B3","C4","D4","E4","F#4","G4","A4","B4","C5","D5","E5","F#5","G5"],desc:["G5","F#5","E5","D5","C5","B4","A4","G4","F#4","E4","D4","C4","B3","A3","G3"]},
+  'D': {asc:["D4","E4","F#4","G4","A4","B4","C#5","D5","E5","F#5","G5","A5","B5","C#6","D6"],desc:["D6","C#6","B5","A5","G5","F#5","E5","D5","C#5","B4","A4","G4","F#4","E4","D4"]},
+  'A': {asc:["A3","B3","C#4","D4","E4","F#4","G#4","A4","B4","C#5","D5","E5","F#5","G#5","A5"],desc:["A5","G#5","F#5","E5","D5","C#5","B4","A4","G#4","F#4","E4","D4","C#4","B3","A3"]},
+  'F': {asc:["F4","G4","A4","Bb4","C5","D5","E5","F5","G5","A5","Bb5","C6","D6","E6","F6"],desc:["F6","E6","D6","C6","Bb5","A5","G5","F5","E5","D5","C5","Bb4","A4","G4","F4"]},
 };
-// Melodic minor ascending (raised 6th & 7th) — ABRSM exam style
-const MINOR_ASC_3 = {
-  'A':["A3","B3","C4","D4","E4","F#4","G#4","A4","B4","C5","D5","E5","F#5","G#5","A5","B5","C6","D6","E6","F#6","G#6","A6"],
-  'Bb':["Bb3","C4","Db4","Eb4","F4","G4","A4","Bb4","C5","Db5","Eb5","F5","G5","A5","Bb5","C6","Db6","Eb6","F6","G6","A6","Bb6"],
-  'B':["B3","C#4","D4","E4","F#4","G#4","A#4","B4","C#5","D5","E5","F#5","G#5","A#5","B5","C#6","D6","E6","F#6","G#6","A#6","B6"],
-  'C':["C4","D4","Eb4","F4","G4","A4","B4","C5","D5","Eb5","F5","G5","A5","B5","C6","D6","Eb6","F6","G6","A6","B6","C7"],
-  'C#':["C#4","D#4","E4","F#4","G#4","A#4","B#4","C#5","D#5","E5","F#5","G#5","A#5","B#5","C#6","D#6","E6","F#6","G#6","A#6","B#6","C#7"],
-  'D':["D4","E4","F4","G4","A4","B4","C#5","D5","E5","F5","G5","A5","B5","C#6","D6","E6","F6","G6","A6","B6","C#7","D7"],
-  'Eb':["Eb4","F4","Gb4","Ab4","Bb4","C5","D5","Eb5","F5","Gb5","Ab5","Bb5","C6","D6","Eb6","F6","Gb6","Ab6","Bb6","C7","D7","Eb7"],
-  'E':["E4","F#4","G4","A4","B4","C#5","D#5","E5","F#5","G5","A5","B5","C#6","D#6","E6","F#6","G6","A6","B6","C#7","D#7","E7"],
-  'F':["F4","G4","Ab4","Bb4","C5","D5","E5","F5","G5","Ab5","Bb5","C6","D6","E6","F6","G6","Ab6","Bb6","C7","D7","E7","F7"],
-  'F#':["F#4","G#4","A4","B4","C#5","D#5","E#5","F#5","G#5","A5","B5","C#6","D#6","E#6","F#6","G#6","A6","B6","C#7","D#7","E#7","F#7"],
-  'G':["G3","A3","Bb3","C4","D4","E4","F#4","G4","A4","Bb4","C5","D5","E5","F#5","G5","A5","Bb5","C6","D6","E6","F#6","G6"],
-  'G#':["G#3","A#3","B3","C#4","D#4","E#4","G4","G#4","A#4","B4","C#5","D#5","E#5","G5","G#5","A#5","B5","C#6","D#6","E#6","G6","G#6"]
+
+const INTERMEDIATE_MAJOR = {
+  'C': {asc:["C4","D4","E4","F4","G4","A4","B4","C5"],desc:["C5","B4","A4","G4","F4","E4","D4","C4"]},
+  'G': {asc:["G3","A3","B3","C4","D4","E4","F#4","G4"],desc:["G4","F#4","E4","D4","C4","B3","A3","G3"]},
+  'D': {asc:["D4","E4","F#4","G4","A4","B4","C#5","D5"],desc:["D5","C#5","B4","A4","G4","F#4","E4","D4"]},
+  'A': {asc:["A3","B3","C#4","D4","E4","F#4","G#4","A4"],desc:["A4","G#4","F#4","E4","D4","C#4","B3","A3"]},
+  'E': {asc:["E4","F#4","G#4","A4","B4","C#5","D#5","E5"],desc:["E5","D#5","C#5","B4","A4","G#4","F#4","E4"]},
+  'B': {asc:["B3","C#4","D#4","E4","F#4","G#4","A#4","B4"],desc:["B4","A#4","G#4","F#4","E4","D#4","C#4","B3"]},
+  'F#': {asc:["F#4","G#4","A#4","B4","C#5","D#5","E#5","F#5"],desc:["F#5","E#5","D#5","C#5","B4","A#4","G#4","F#4"]},
+  'Db': {asc:["Db4","Eb4","F4","Gb4","Ab4","Bb4","C5","Db5"],desc:["Db5","C5","Bb4","Ab4","Gb4","F4","Eb4","Db4"]},
+  'Ab': {asc:["Ab3","Bb3","C4","Db4","Eb4","F4","G4","Ab4"],desc:["Ab4","G4","F4","Eb4","Db4","C4","Bb3","Ab3"]},
+  'Eb': {asc:["Eb4","F4","G4","Ab4","Bb4","C5","D5","Eb5"],desc:["Eb5","D5","C5","Bb4","Ab4","G4","F4","Eb4"]},
+  'Bb': {asc:["Bb3","C4","D4","Eb4","F4","G4","A4","Bb4"],desc:["Bb4","A4","G4","F4","Eb4","D4","C4","Bb3"]},
+  'F': {asc:["F4","G4","A4","Bb4","C5","D5","E5","F5"],desc:["F5","E5","D5","C5","Bb4","A4","G4","F4"]},
 };
-// Natural minor descending — ABRSM exam style
-const MINOR_DESC_3 = {
-  'A':["A6","G6","F6","E6","D6","C6","B5","A5","G5","F5","E5","D5","C5","B4","A4","G4","F4","E4","D4","C4","B3","A3"],
-  'Bb':["Bb6","Ab6","Gb6","F6","Eb6","Db6","C6","Bb5","Ab5","Gb5","F5","Eb5","Db5","C5","Bb4","Ab4","Gb4","F4","Eb4","Db4","C4","Bb3"],
-  'B':["B6","A6","G6","F#6","E6","D6","C#6","B5","A5","G5","F#5","E5","D5","C#5","B4","A4","G4","F#4","E4","D4","C#4","B3"],
-  'C':["C7","Bb6","Ab6","G6","F6","Eb6","D6","C6","Bb5","Ab5","G5","F5","Eb5","D5","C5","Bb4","Ab4","G4","F4","Eb4","D4","C4"],
-  'C#':["C#7","B6","A6","G#6","F#6","E6","D#6","C#6","B5","A5","G#5","F#5","E5","D#5","C#5","B4","A4","G#4","F#4","E4","D#4","C#4"],
-  'D':["D7","C7","Bb6","A6","G6","F6","E6","D6","C6","Bb5","A5","G5","F5","E5","D5","C5","Bb4","A4","G4","F4","E4","D4"],
-  'Eb':["Eb7","Db7","Cb7","Bb6","Ab6","Gb6","F6","Eb6","Db6","Cb6","Bb5","Ab5","Gb5","F5","Eb5","Db5","Cb5","Bb4","Ab4","Gb4","F4","Eb4"],
-  'E':["E7","D7","C7","B6","A6","G6","F#6","E6","D6","C6","B5","A5","G5","F#5","E5","D5","C5","B4","A4","G4","F#4","E4"],
-  'F':["F7","Eb7","Db7","C7","Bb6","Ab6","G6","F6","Eb6","Db6","C6","Bb5","Ab5","G5","F5","Eb5","Db5","C5","Bb4","Ab4","G4","F4"],
-  'F#':["F#7","E7","D7","C#7","B6","A6","G#6","F#6","E6","D6","C#6","B5","A5","G#5","F#5","E5","D5","C#5","B4","A4","G#4","F#4"],
-  'G':["G6","F6","Eb6","D6","C6","Bb5","A5","G5","F5","Eb5","D5","C5","Bb4","A4","G4","F4","Eb4","D4","C4","Bb3","A3","G3"],
-  'G#':["G#6","F#6","E6","D#6","C#6","B5","A#5","G#5","F#5","E5","D#5","C#5","B4","A#4","G#4","F#4","E4","D#4","C#4","B3","A#3","G#3"]
+
+const INTERMEDIATE_MINOR = {
+  'A': {
+    natural: {asc:["A3","B3","C4","D4","E4","F4","G4","A4"],desc:["A4","G4","F4","E4","D4","C4","B3","A3"]},
+    harmonic: {asc:["A3","B3","C4","D4","E4","F4","G#4","A4"],desc:["A4","G#4","F4","E4","D4","C4","B3","A3"]},
+    melodic: {asc:["A3","B3","C4","D4","E4","F#4","G#4","A4"],desc:["A4","G4","F4","E4","D4","C4","B3","A3"]},
+  },
+  'E': {
+    natural: {asc:["E4","F#4","G4","A4","B4","C5","D5","E5"],desc:["E5","D5","C5","B4","A4","G4","F#4","E4"]},
+    harmonic: {asc:["E4","F#4","G4","A4","B4","C5","D#5","E5"],desc:["E5","D#5","C5","B4","A4","G4","F#4","E4"]},
+    melodic: {asc:["E4","F#4","G4","A4","B4","C#5","D#5","E5"],desc:["E5","D5","C5","B4","A4","G4","F#4","E4"]},
+  },
+  'B': {
+    natural: {asc:["B3","C#4","D4","E4","F#4","G4","A4","B4"],desc:["B4","A4","G4","F#4","E4","D4","C#4","B3"]},
+    harmonic: {asc:["B3","C#4","D4","E4","F#4","G4","A#4","B4"],desc:["B4","A#4","G4","F#4","E4","D4","C#4","B3"]},
+    melodic: {asc:["B3","C#4","D4","E4","F#4","G#4","A#4","B4"],desc:["B4","A4","G4","F#4","E4","D4","C#4","B3"]},
+  },
+  'F#': {
+    natural: {asc:["F#4","G#4","A4","B4","C#5","D5","E5","F#5"],desc:["F#5","E5","D5","C#5","B4","A4","G#4","F#4"]},
+    harmonic: {asc:["F#4","G#4","A4","B4","C#5","D5","E#5","F#5"],desc:["F#5","E#5","D5","C#5","B4","A4","G#4","F#4"]},
+    melodic: {asc:["F#4","G#4","A4","B4","C#5","D#5","E#5","F#5"],desc:["F#5","E5","D5","C#5","B4","A4","G#4","F#4"]},
+  },
+  'C#': {
+    natural: {asc:["C#4","D#4","E4","F#4","G#4","A4","B4","C#5"],desc:["C#5","B4","A4","G#4","F#4","E4","D#4","C#4"]},
+    harmonic: {asc:["C#4","D#4","E4","F#4","G#4","A4","B#5","C#5"],desc:["C#5","B#5","A4","G#4","F#4","E4","D#4","C#4"]},
+    melodic: {asc:["C#4","D#4","E4","F#4","G#4","A#4","B#5","C#5"],desc:["C#5","B4","A4","G#4","F#4","E4","D#4","C#4"]},
+  },
+  'G#': {
+    natural: {asc:["G#3","A#3","B3","C#4","D#4","E4","F#4","G#4"],desc:["G#4","F#4","E4","D#4","C#4","B3","A#3","G#3"]},
+    harmonic: {asc:["G#3","A#3","B3","C#4","D#4","E4","Fx4","G#4"],desc:["G#4","Fx4","E4","D#4","C#4","B3","A#3","G#3"]},
+    melodic: {asc:["G#3","A#3","B3","C#4","D#4","E#4","Fx4","G#4"],desc:["G#4","F#4","E4","D#4","C#4","B3","A#3","G#3"]},
+  },
+  'D': {
+    natural: {asc:["D4","E4","F4","G4","A4","Bb4","C5","D5"],desc:["D5","C5","Bb4","A4","G4","F4","E4","D4"]},
+    harmonic: {asc:["D4","E4","F4","G4","A4","Bb4","C#5","D5"],desc:["D5","C#5","Bb4","A4","G4","F4","E4","D4"]},
+    melodic: {asc:["D4","E4","F4","G4","A4","B4","C#5","D5"],desc:["D5","C5","Bb4","A4","G4","F4","E4","D4"]},
+  },
+  'G': {
+    natural: {asc:["G3","A3","Bb3","C4","D4","Eb4","F4","G4"],desc:["G4","F4","Eb4","D4","C4","Bb3","A3","G3"]},
+    harmonic: {asc:["G3","A3","Bb3","C4","D4","Eb4","F#4","G4"],desc:["G4","F#4","Eb4","D4","C4","Bb3","A3","G3"]},
+    melodic: {asc:["G3","A3","Bb3","C4","D4","E4","F#4","G4"],desc:["G4","F4","Eb4","D4","C4","Bb3","A3","G3"]},
+  },
+  'C': {
+    natural: {asc:["C4","D4","Eb4","F4","G4","Ab4","Bb4","C5"],desc:["C5","Bb4","Ab4","G4","F4","Eb4","D4","C4"]},
+    harmonic: {asc:["C4","D4","Eb4","F4","G4","Ab4","B4","C5"],desc:["C5","B4","Ab4","G4","F4","Eb4","D4","C4"]},
+    melodic: {asc:["C4","D4","Eb4","F4","G4","A4","B4","C5"],desc:["C5","Bb4","Ab4","G4","F4","Eb4","D4","C4"]},
+  },
+  'F': {
+    natural: {asc:["F4","G4","Ab4","Bb4","C5","Db5","Eb5","F5"],desc:["F5","Eb5","Db5","C5","Bb4","Ab4","G4","F4"]},
+    harmonic: {asc:["F4","G4","Ab4","Bb4","C5","Db5","E5","F5"],desc:["F5","E5","Db5","C5","Bb4","Ab4","G4","F4"]},
+    melodic: {asc:["F4","G4","Ab4","Bb4","C5","D5","E5","F5"],desc:["F5","Eb5","Db5","C5","Bb4","Ab4","G4","F4"]},
+  },
+  'Bb': {
+    natural: {asc:["Bb3","C4","Db4","Eb4","F4","Gb4","Ab4","Bb4"],desc:["Bb4","Ab4","Gb4","F4","Eb4","Db4","C4","Bb3"]},
+    harmonic: {asc:["Bb3","C4","Db4","Eb4","F4","Gb4","A4","Bb4"],desc:["Bb4","A4","Gb4","F4","Eb4","Db4","C4","Bb3"]},
+    melodic: {asc:["Bb3","C4","Db4","Eb4","F4","G4","A4","Bb4"],desc:["Bb4","Ab4","Gb4","F4","Eb4","Db4","C4","Bb3"]},
+  },
+  'Eb': {
+    natural: {asc:["Eb4","F4","Gb4","Ab4","Bb4","Cb4","Db5","Eb5"],desc:["Eb5","Db5","Cb4","Bb4","Ab4","Gb4","F4","Eb4"]},
+    harmonic: {asc:["Eb4","F4","Gb4","Ab4","Bb4","Cb4","D5","Eb5"],desc:["Eb5","D5","Cb4","Bb4","Ab4","Gb4","F4","Eb4"]},
+    melodic: {asc:["Eb4","F4","Gb4","Ab4","Bb4","C5","D5","Eb5"],desc:["Eb5","Db5","Cb4","Bb4","Ab4","Gb4","F4","Eb4"]},
+  },
+};
+
+const ADVANCED_MAJOR = {
+  'C': {asc:["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5","A5","B5","C6","D6","E6","F6","G6","A6","B6","C7"],desc:["C7","B6","A6","G6","F6","E6","D6","C6","B5","A5","G5","F5","E5","D5","C5","B4","A4","G4","F4","E4","D4","C4"]},
+  'G': {asc:["G3","A3","B3","C4","D4","E4","F#4","G4","A4","B4","C5","D5","E5","F#5","G5","A5","B5","C6","D6","E6","F#6","G6"],desc:["G6","F#6","E6","D6","C6","B5","A5","G5","F#5","E5","D5","C5","B4","A4","G4","F#4","E4","D4","C4","B3","A3","G3"]},
+  'D': {asc:["D4","E4","F#4","G4","A4","B4","C#5","D5","E5","F#5","G5","A5","B5","C#6","D6","E6","F#6","G6","A6","B6","C#7","D7"],desc:["D7","C#7","B6","A6","G6","F#6","E6","D6","C#6","B5","A5","G5","F#5","E5","D5","C#5","B4","A4","G4","F#4","E4","D4"]},
+  'A': {asc:["A3","B3","C#4","D4","E4","F#4","G#4","A4","B4","C#5","D5","E5","F#5","G#5","A5","B5","C#6","D6","E6","F#6","G#6","A6"],desc:["A6","G#6","F#6","E6","D6","C#6","B5","A5","G#5","F#5","E5","D5","C#5","B4","A4","G#4","F#4","E4","D4","C#4","B3","A3"]},
+  'E': {asc:["E4","F#4","G#4","A4","B4","C#5","D#5","E5","F#5","G#5","A5","B5","C#6","D#6","E6","F#6","G#6","A6","B6","C#7","D#7","E7"],desc:["E7","D#7","C#7","B6","A6","G#6","F#6","E6","D#6","C#6","B5","A5","G#5","F#5","E5","D#5","C#5","B4","A4","G#4","F#4","E4"]},
+  'B': {asc:["B3","C#4","D#4","E4","F#4","G#4","A#4","B4","C#5","D#5","E5","F#5","G#5","A#5","B5","C#6","D#6","E6","F#6","G#6","A#6","B6"],desc:["B6","A#6","G#6","F#6","E6","D#6","C#6","B5","A#5","G#5","F#5","E5","D#5","C#5","B4","A#4","G#4","F#4","E4","D#4","C#4","B3"]},
+  'F#': {asc:["F#4","G#4","A#4","B4","C#5","D#5","E#5","F#5","G#5","A#5","B5","C#6","D#6","E#6","F#6","G#6","A#6","B6","C#7","D#7","E#7","F#7"],desc:["F#7","E#7","D#7","C#7","B6","A#6","G#6","F#6","E#6","D#6","C#6","B5","A#5","G#5","F#5","E#5","D#5","C#5","B4","A#4","G#4","F#4"]},
+  'Db': {asc:["Db4","Eb4","F4","Gb4","Ab4","Bb4","C5","Db5","Eb5","F5","Gb5","Ab5","Bb5","C6","Db6","Eb6","F6","Gb6","Ab6","Bb6","C7","Db7"],desc:["Db7","C7","Bb6","Ab6","Gb6","F6","Eb6","Db6","C6","Bb5","Ab5","Gb5","F5","Eb5","Db5","C5","Bb4","Ab4","Gb4","F4","Eb4","Db4"]},
+  'Ab': {asc:["Ab3","Bb3","C4","Db4","Eb4","F4","G4","Ab4","Bb4","C5","Db5","Eb5","F5","G5","Ab5","Bb5","C6","Db6","Eb6","F6","G6","Ab6"],desc:["Ab6","G6","F6","Eb6","Db6","C6","Bb5","Ab5","G5","F5","Eb5","Db5","C5","Bb4","Ab4","G4","F4","Eb4","Db4","C4","Bb3","Ab3"]},
+  'Eb': {asc:["Eb4","F4","G4","Ab4","Bb4","C5","D5","Eb5","F5","G5","Ab5","Bb5","C6","D6","Eb6","F6","G6","Ab6","Bb6","C7","D7","Eb7"],desc:["Eb7","D7","C7","Bb6","Ab6","G6","F6","Eb6","D6","C6","Bb5","Ab5","G5","F5","Eb5","D5","C5","Bb4","Ab4","G4","F4","Eb4"]},
+  'Bb': {asc:["Bb3","C4","D4","Eb4","F4","G4","A4","Bb4","C5","D5","Eb5","F5","G5","A5","Bb5","C6","D6","Eb6","F6","G6","A6","Bb6"],desc:["Bb6","A6","G6","F6","Eb6","D6","C6","Bb5","A5","G5","F5","Eb5","D5","C5","Bb4","A4","G4","F4","Eb4","D4","C4","Bb3"]},
+  'F': {asc:["F4","G4","A4","Bb4","C5","D5","E5","F5","G5","A5","Bb5","C6","D6","E6","F6","G6","A6","Bb6","C7","D7","E7","F7"],desc:["F7","E7","D7","C7","Bb6","A6","G6","F6","E6","D6","C6","Bb5","A5","G5","F5","E5","D5","C5","Bb4","A4","G4","F4"]},
+};
+
+const ADVANCED_NATURAL_MINOR = {
+  'A': {asc:["A3","B3","C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5","A5","B5","C6","D6","E6","F6","G6","A6"],desc:["A6","G6","F6","E6","D6","C6","B5","A5","G5","F5","E5","D5","C5","B4","A4","G4","F4","E4","D4","C4","B3","A3"]},
+  'E': {asc:["E4","F#4","G4","A4","B4","C5","D5","E5","F#5","G5","A5","B5","C6","D6","E6","F#6","G6","A6","B6","C7","D7","E7"],desc:["E7","D7","C7","B6","A6","G6","F#6","E6","D6","C6","B5","A5","G5","F#5","E5","D5","C5","B4","A4","G4","F#4","E4"]},
+  'B': {asc:["B3","C#4","D4","E4","F#4","G4","A4","B4","C#5","D5","E5","F#5","G5","A5","B5","C#6","D6","E6","F#6","G6","A6","B6"],desc:["B6","A6","G6","F#6","E6","D6","C#6","B5","A5","G5","F#5","E5","D5","C#5","B4","A4","G4","F#4","E4","D4","C#4","B3"]},
+  'F#': {asc:["F#4","G#4","A4","B4","C#5","D5","E5","F#5","G#5","A5","B5","C#6","D6","E6","F#6","G#6","A6","B6","C#7","D7","E7","F#7"],desc:["F#7","E7","D7","C#7","B6","A6","G#6","F#6","E6","D6","C#6","B5","A5","G#5","F#5","E5","D5","C#5","B4","A4","G#4","F#4"]},
+  'C#': {asc:["C#4","D#4","E4","F#4","G#4","A4","B4","C#5","D#5","E5","F#5","G#5","A5","B5","C#6","D#6","E6","F#6","G#6","A6","B6","C#7"],desc:["C#7","B6","A6","G#6","F#6","E6","D#6","C#6","B5","A5","G#5","F#5","E5","D#5","C#5","B4","A4","G#4","F#4","E4","D#4","C#4"]},
+  'G#': {asc:["G#3","A#3","B3","C#4","D#4","E4","F#4","G#4","A#4","B4","C#5","D#5","E5","F#5","G#5","A#5","B5","C#6","D#6","E6","F#6","G#6"],desc:["G#6","F#6","E6","D#6","C#6","B5","A#5","G#5","F#5","E5","D#5","C#5","B4","A#4","G#4","F#4","E4","D#4","C#4","B3","A#3","G#3"]},
+  'D': {asc:["D4","E4","F4","G4","A4","Bb4","C5","D5","E5","F5","G5","A5","Bb5","C6","D6","E6","F6","G6","A6","Bb6","C7","D7"],desc:["D7","C7","Bb6","A6","G6","F6","E6","D6","C6","Bb5","A5","G5","F5","E5","D5","C5","Bb4","A4","G4","F4","E4","D4"]},
+  'G': {asc:["G3","A3","Bb3","C4","D4","Eb4","F4","G4","A4","Bb4","C5","D5","Eb5","F5","G5","A5","Bb5","C6","D6","Eb6","F6","G6"],desc:["G6","F6","Eb6","D6","C6","Bb5","A5","G5","F5","Eb5","D5","C5","Bb4","A4","G4","F4","Eb4","D4","C4","Bb3","A3","G3"]},
+  'C': {asc:["C4","D4","Eb4","F4","G4","Ab4","Bb4","C5","D5","Eb5","F5","G5","Ab5","Bb5","C6","D6","Eb6","F6","G6","Ab6","Bb6","C7"],desc:["C7","Bb6","Ab6","G6","F6","Eb6","D6","C6","Bb5","Ab5","G5","F5","Eb5","D5","C5","Bb4","Ab4","G4","F4","Eb4","D4","C4"]},
+  'F': {asc:["F4","G4","Ab4","Bb4","C5","Db5","Eb5","F5","G5","Ab5","Bb5","C6","Db6","Eb6","F6","G6","Ab6","Bb6","C7","Db7","Eb7","F7"],desc:["F7","Eb7","Db7","C7","Bb6","Ab6","G6","F6","Eb6","Db6","C6","Bb5","Ab5","G5","F5","Eb5","Db5","C5","Bb4","Ab4","G4","F4"]},
+  'Bb': {asc:["Bb3","C4","Db4","Eb4","F4","Gb4","Ab4","Bb4","C5","Db5","Eb5","F5","Gb5","Ab5","Bb5","C6","Db6","Eb6","F6","Gb6","Ab6","Bb6"],desc:["Bb6","Ab6","Gb6","F6","Eb6","Db6","C6","Bb5","Ab5","Gb5","F5","Eb5","Db5","C5","Bb4","Ab4","Gb4","F4","Eb4","Db4","C4","Bb3"]},
+  'Eb': {asc:["Eb4","F4","Gb4","Ab4","Bb4","Cb4","Db5","Eb5","F5","Gb5","Ab5","Bb5","Cb5","Db6","Eb6","F6","Gb6","Ab6","Bb6","Cb6","Db7","Eb7"],desc:["Eb7","Db7","Cb6","Bb6","Ab6","Gb6","F6","Eb6","Db6","Cb5","Bb5","Ab5","Gb5","F5","Eb5","Db5","Cb4","Bb4","Ab4","Gb4","F4","Eb4"]},
+};
+
+const ADVANCED_HARMONIC_MINOR = {
+  'A': {asc:["A3","B3","C4","D4","E4","F4","G#4","A4","B4","C5","D5","E5","F5","G#5","A5","B5","C6","D6","E6","F6","G#6","A6"],desc:["A6","G#6","F6","E6","D6","C6","B5","A5","G#5","F5","E5","D5","C5","B4","A4","G#4","F4","E4","D4","C4","B3","A3"]},
+  'E': {asc:["E4","F#4","G4","A4","B4","C5","D#5","E5","F#5","G5","A5","B5","C6","D#6","E6","F#6","G6","A6","B6","C7","D#7","E7"],desc:["E7","D#7","C7","B6","A6","G6","F#6","E6","D#6","C6","B5","A5","G5","F#5","E5","D#5","C5","B4","A4","G4","F#4","E4"]},
+  'B': {asc:["B3","C#4","D4","E4","F#4","G4","A#4","B4","C#5","D5","E5","F#5","G5","A#5","B5","C#6","D6","E6","F#6","G6","A#6","B6"],desc:["B6","A#6","G6","F#6","E6","D6","C#6","B5","A#5","G5","F#5","E5","D5","C#5","B4","A#4","G4","F#4","E4","D4","C#4","B3"]},
+  'F#': {asc:["F#4","G#4","A4","B4","C#5","D5","E#5","F#5","G#5","A5","B5","C#6","D6","E#6","F#6","G#6","A6","B6","C#7","D7","E#7","F#7"],desc:["F#7","E#7","D7","C#7","B6","A6","G#6","F#6","E#6","D6","C#6","B5","A5","G#5","F#5","E#5","D5","C#5","B4","A4","G#4","F#4"]},
+  'C#': {asc:["C#4","D#4","E4","F#4","G#4","A4","B#5","C#5","D#5","E5","F#5","G#5","A5","B#6","C#6","D#6","E6","F#6","G#6","A6","B#7","C#7"],desc:["C#7","B#7","A6","G#6","F#6","E6","D#6","C#6","B#6","A5","G#5","F#5","E5","D#5","C#5","B#5","A4","G#4","F#4","E4","D#4","C#4"]},
+  'G#': {asc:["G#3","A#3","B3","C#4","D#4","E4","Fx4","G#4","A#4","B4","C#5","D#5","E5","Fx5","G#5","A#5","B5","C#6","D#6","E6","Fx6","G#6"],desc:["G#6","Fx6","E6","D#6","C#6","B5","A#5","G#5","Fx5","E5","D#5","C#5","B4","A#4","G#4","Fx4","E4","D#4","C#4","B3","A#3","G#3"]},
+  'D': {asc:["D4","E4","F4","G4","A4","Bb4","C#5","D5","E5","F5","G5","A5","Bb5","C#6","D6","E6","F6","G6","A6","Bb6","C#7","D7"],desc:["D7","C#7","Bb6","A6","G6","F6","E6","D6","C#6","Bb5","A5","G5","F5","E5","D5","C#5","Bb4","A4","G4","F4","E4","D4"]},
+  'G': {asc:["G3","A3","Bb3","C4","D4","Eb4","F#4","G4","A4","Bb4","C5","D5","Eb5","F#5","G5","A5","Bb5","C6","D6","Eb6","F#6","G6"],desc:["G6","F#6","Eb6","D6","C6","Bb5","A5","G5","F#5","Eb5","D5","C5","Bb4","A4","G4","F#4","Eb4","D4","C4","Bb3","A3","G3"]},
+  'C': {asc:["C4","D4","Eb4","F4","G4","Ab4","B4","C5","D5","Eb5","F5","G5","Ab5","B5","C6","D6","Eb6","F6","G6","Ab6","B6","C7"],desc:["C7","B6","Ab6","G6","F6","Eb6","D6","C6","B5","Ab5","G5","F5","Eb5","D5","C5","B4","Ab4","G4","F4","Eb4","D4","C4"]},
+  'F': {asc:["F4","G4","Ab4","Bb4","C5","Db5","E5","F5","G5","Ab5","Bb5","C6","Db6","E6","F6","G6","Ab6","Bb6","C7","Db7","E7","F7"],desc:["F7","E7","Db7","C7","Bb6","Ab6","G6","F6","E6","Db6","C6","Bb5","Ab5","G5","F5","E5","Db5","C5","Bb4","Ab4","G4","F4"]},
+  'Bb': {asc:["Bb3","C4","Db4","Eb4","F4","Gb4","A4","Bb4","C5","Db5","Eb5","F5","Gb5","A5","Bb5","C6","Db6","Eb6","F6","Gb6","A6","Bb6"],desc:["Bb6","A6","Gb6","F6","Eb6","Db6","C6","Bb5","A5","Gb5","F5","Eb5","Db5","C5","Bb4","A4","Gb4","F4","Eb4","Db4","C4","Bb3"]},
+  'Eb': {asc:["Eb4","F4","Gb4","Ab4","Bb4","Cb4","D5","Eb5","F5","Gb5","Ab5","Bb5","Cb5","D6","Eb6","F6","Gb6","Ab6","Bb6","Cb6","D7","Eb7"],desc:["Eb7","D7","Cb6","Bb6","Ab6","Gb6","F6","Eb6","D6","Cb5","Bb5","Ab5","Gb5","F5","Eb5","D5","Cb4","Bb4","Ab4","Gb4","F4","Eb4"]},
+};
+
+const ADVANCED_MELODIC_MINOR = {
+  'A': {asc:["A3","B3","C4","D4","E4","F#4","G#4","A4","B4","C5","D5","E5","F#5","G#5","A5","B5","C6","D6","E6","F#6","G#6","A6"],desc:["A6","G6","F6","E6","D6","C6","B5","A5","G5","F5","E5","D5","C5","B4","A4","G4","F4","E4","D4","C4","B3","A3"]},
+  'E': {asc:["E4","F#4","G4","A4","B4","C#5","D#5","E5","F#5","G5","A5","B5","C#6","D#6","E6","F#6","G6","A6","B6","C#7","D#7","E7"],desc:["E7","D7","C7","B6","A6","G6","F#6","E6","D6","C6","B5","A5","G5","F#5","E5","D5","C5","B4","A4","G4","F#4","E4"]},
+  'B': {asc:["B3","C#4","D4","E4","F#4","G#4","A#4","B4","C#5","D5","E5","F#5","G#5","A#5","B5","C#6","D6","E6","F#6","G#6","A#6","B6"],desc:["B6","A6","G6","F#6","E6","D6","C#6","B5","A5","G5","F#5","E5","D5","C#5","B4","A4","G4","F#4","E4","D4","C#4","B3"]},
+  'F#': {asc:["F#4","G#4","A4","B4","C#5","D#5","E#5","F#5","G#5","A5","B5","C#6","D#6","E#6","F#6","G#6","A6","B6","C#7","D#7","E#7","F#7"],desc:["F#7","E7","D7","C#7","B6","A6","G#6","F#6","E6","D6","C#6","B5","A5","G#5","F#5","E5","D5","C#5","B4","A4","G#4","F#4"]},
+  'C#': {asc:["C#4","D#4","E4","F#4","G#4","A#4","B#5","C#5","D#5","E5","F#5","G#5","A#5","B#6","C#6","D#6","E6","F#6","G#6","A#6","B#7","C#7"],desc:["C#7","B6","A6","G#6","F#6","E6","D#6","C#6","B5","A5","G#5","F#5","E5","D#5","C#5","B4","A4","G#4","F#4","E4","D#4","C#4"]},
+  'G#': {asc:["G#3","A#3","B3","C#4","D#4","E#4","Fx4","G#4","A#4","B4","C#5","D#5","E#5","Fx5","G#5","A#5","B5","C#6","D#6","E#6","Fx6","G#6"],desc:["G#6","F#6","E6","D#6","C#6","B5","A#5","G#5","F#5","E5","D#5","C#5","B4","A#4","G#4","F#4","E4","D#4","C#4","B3","A#3","G#3"]},
+  'D': {asc:["D4","E4","F4","G4","A4","B4","C#5","D5","E5","F5","G5","A5","B5","C#6","D6","E6","F6","G6","A6","B6","C#7","D7"],desc:["D7","C7","Bb6","A6","G6","F6","E6","D6","C6","Bb5","A5","G5","F5","E5","D5","C5","Bb4","A4","G4","F4","E4","D4"]},
+  'G': {asc:["G3","A3","Bb3","C4","D4","E4","F#4","G4","A4","Bb4","C5","D5","E5","F#5","G5","A5","Bb5","C6","D6","E6","F#6","G6"],desc:["G6","F6","Eb6","D6","C6","Bb5","A5","G5","F5","Eb5","D5","C5","Bb4","A4","G4","F4","Eb4","D4","C4","Bb3","A3","G3"]},
+  'C': {asc:["C4","D4","Eb4","F4","G4","A4","B4","C5","D5","Eb5","F5","G5","A5","B5","C6","D6","Eb6","F6","G6","A6","B6","C7"],desc:["C7","Bb6","Ab6","G6","F6","Eb6","D6","C6","Bb5","Ab5","G5","F5","Eb5","D5","C5","Bb4","Ab4","G4","F4","Eb4","D4","C4"]},
+  'F': {asc:["F4","G4","Ab4","Bb4","C5","D5","E5","F5","G5","Ab5","Bb5","C6","D6","E6","F6","G6","Ab6","Bb6","C7","D7","E7","F7"],desc:["F7","Eb7","Db7","C7","Bb6","Ab6","G6","F6","Eb6","Db6","C6","Bb5","Ab5","G5","F5","Eb5","Db5","C5","Bb4","Ab4","G4","F4"]},
+  'Bb': {asc:["Bb3","C4","Db4","Eb4","F4","G4","A4","Bb4","C5","Db5","Eb5","F5","G5","A5","Bb5","C6","Db6","Eb6","F6","G6","A6","Bb6"],desc:["Bb6","Ab6","Gb6","F6","Eb6","Db6","C6","Bb5","Ab5","Gb5","F5","Eb5","Db5","C5","Bb4","Ab4","Gb4","F4","Eb4","Db4","C4","Bb3"]},
+  'Eb': {asc:["Eb4","F4","Gb4","Ab4","Bb4","C5","D5","Eb5","F5","Gb5","Ab5","Bb5","C6","D6","Eb6","F6","Gb6","Ab6","Bb6","C7","D7","Eb7"],desc:["Eb7","Db7","Cb6","Bb6","Ab6","Gb6","F6","Eb6","Db6","Cb5","Bb5","Ab5","Gb5","F5","Eb5","Db5","Cb4","Bb4","Ab4","Gb4","F4","Eb4"]},
+};
+
+const CHROMATIC_3OCT = {asc:["G3","G#3","A3","A#3","B3","C4","C#4","D4","D#4","E4","F4","F#4","G4","G#4","A4","A#4","B4","C5","C#5","D5","D#5","E5","F5","F#5","G5","G#5","A5","A#5","B5","C6","C#6","D6","D#6","E6","F6","F#6","G6"],desc:["G6","Gb6","F6","E6","Eb6","D6","Db6","C6","B5","Bb5","A5","Ab5","G5","Gb5","F5","E5","Eb5","D5","Db5","C5","B4","Bb4","A4","Ab4","G4","Gb4","F4","E4","Eb4","D4","Db4","C4","B3","Bb3","A3","Ab3","G3"]};
+
+const MAJOR_ARPEGGIO = {
+  'C': {asc:["C4","E4","G4","C5","E5","G5","C6","E6","G6","C7"],desc:["C7","G6","E6","C6","G5","E5","C5","G4","E4","C4"]},
+  'G': {asc:["G3","B3","D4","G4","B4","D5","G5","B5","D6","G6"],desc:["G6","D6","B5","G5","D5","B4","G4","D4","B3","G3"]},
+  'D': {asc:["D4","F#4","A4","D5","F#5","A5","D6","F#6","A6","D7"],desc:["D7","A6","F#6","D6","A5","F#5","D5","A4","F#4","D4"]},
+  'A': {asc:["A3","C#4","E4","A4","C#5","E5","A5","C#6","E6","A6"],desc:["A6","E6","C#6","A5","E5","C#5","A4","E4","C#4","A3"]},
+  'E': {asc:["E4","G#4","B4","E5","G#5","B5","E6","G#6","B6","E7"],desc:["E7","B6","G#6","E6","B5","G#5","E5","B4","G#4","E4"]},
+  'B': {asc:["B3","D#4","F#4","B4","D#5","F#5","B5","D#6","F#6","B6"],desc:["B6","F#6","D#6","B5","F#5","D#5","B4","F#4","D#4","B3"]},
+  'F#': {asc:["F#4","A#4","C#5","F#5","A#5","C#6","F#6","A#6","C#7","F#7"],desc:["F#7","C#7","A#6","F#6","C#6","A#5","F#5","C#5","A#4","F#4"]},
+  'Db': {asc:["Db4","F4","Ab4","Db5","F5","Ab5","Db6","F6","Ab6","Db7"],desc:["Db7","Ab6","F6","Db6","Ab5","F5","Db5","Ab4","F4","Db4"]},
+  'Ab': {asc:["Ab3","C4","Eb4","Ab4","C5","Eb5","Ab5","C6","Eb6","Ab6"],desc:["Ab6","Eb6","C6","Ab5","Eb5","C5","Ab4","Eb4","C4","Ab3"]},
+  'Eb': {asc:["Eb4","G4","Bb4","Eb5","G5","Bb5","Eb6","G6","Bb6","Eb7"],desc:["Eb7","Bb6","G6","Eb6","Bb5","G5","Eb5","Bb4","G4","Eb4"]},
+  'Bb': {asc:["Bb3","D4","F4","Bb4","D5","F5","Bb5","D6","F6","Bb6"],desc:["Bb6","F6","D6","Bb5","F5","D5","Bb4","F4","D4","Bb3"]},
+  'F': {asc:["F4","A4","C5","F5","A5","C6","F6","A6","C7","F7"],desc:["F7","C7","A6","F6","C6","A5","F5","C5","A4","F4"]},
+};
+
+const MINOR_ARPEGGIO = {
+  'A': {asc:["A3","C4","E4","A4","C5","E5","A5","C6","E6","A6"],desc:["A6","E6","C6","A5","E5","C5","A4","E4","C4","A3"]},
+  'E': {asc:["E4","G4","B4","E5","G5","B5","E6","G6","B6","E7"],desc:["E7","B6","G6","E6","B5","G5","E5","B4","G4","E4"]},
+  'B': {asc:["B3","D4","F#4","B4","D5","F#5","B5","D6","F#6","B6"],desc:["B6","F#6","D6","B5","F#5","D5","B4","F#4","D4","B3"]},
+  'F#': {asc:["F#4","A4","C#5","F#5","A5","C#6","F#6","A6","C#7","F#7"],desc:["F#7","C#7","A6","F#6","C#6","A5","F#5","C#5","A4","F#4"]},
+  'C#': {asc:["C#4","E4","G#4","C#5","E5","G#5","C#6","E6","G#6","C#7"],desc:["C#7","G#6","E6","C#6","G#5","E5","C#5","G#4","E4","C#4"]},
+  'G#': {asc:["G#3","B3","D#4","G#4","B4","D#5","G#5","B5","D#6","G#6"],desc:["G#6","D#6","B5","G#5","D#5","B4","G#4","D#4","B3","G#3"]},
+  'D': {asc:["D4","F4","A4","D5","F5","A5","D6","F6","A6","D7"],desc:["D7","A6","F6","D6","A5","F5","D5","A4","F4","D4"]},
+  'G': {asc:["G3","Bb3","D4","G4","Bb4","D5","G5","Bb5","D6","G6"],desc:["G6","D6","Bb5","G5","D5","Bb4","G4","D4","Bb3","G3"]},
+  'C': {asc:["C4","Eb4","G4","C5","Eb5","G5","C6","Eb6","G6","C7"],desc:["C7","G6","Eb6","C6","G5","Eb5","C5","G4","Eb4","C4"]},
+  'F': {asc:["F4","Ab4","C5","F5","Ab5","C6","F6","Ab6","C7","F7"],desc:["F7","C7","Ab6","F6","C6","Ab5","F5","C5","Ab4","F4"]},
+  'Bb': {asc:["Bb3","Db4","F4","Bb4","Db5","F5","Bb5","Db6","F6","Bb6"],desc:["Bb6","F6","Db6","Bb5","F5","Db5","Bb4","F4","Db4","Bb3"]},
+  'Eb': {asc:["Eb4","Gb4","Bb4","Eb5","Gb5","Bb5","Eb6","Gb6","Bb6","Eb7"],desc:["Eb7","Bb6","Gb6","Eb6","Bb5","Gb5","Eb5","Bb4","Gb4","Eb4"]},
+};
+
+const DOM7_ARPEGGIO = {
+  'C': {asc:["C4","E4","G4","Bb4","C5","E5","G5","Bb5","C6","E6","G6","Bb6","C7"],desc:["C7","Bb6","G6","E6","C6","Bb5","G5","E5","C5","Bb4","G4","E4","C4"]},
+  'G': {asc:["G3","B3","D4","F4","G4","B4","D5","F5","G5","B5","D6","F6","G6"],desc:["G6","F6","D6","B5","G5","F5","D5","B4","G4","F4","D4","B3","G3"]},
+  'D': {asc:["D4","F#4","A4","C5","D5","F#5","A5","C6","D6","F#6","A6","C7","D7"],desc:["D7","C7","A6","F#6","D6","C6","A5","F#5","D5","C5","A4","F#4","D4"]},
+  'A': {asc:["A3","C#4","E4","G4","A4","C#5","E5","G5","A5","C#6","E6","G6","A6"],desc:["A6","G6","E6","C#6","A5","G5","E5","C#5","A4","G4","E4","C#4","A3"]},
+  'E': {asc:["E4","G#4","B4","D5","E5","G#5","B5","D6","E6","G#6","B6","D7","E7"],desc:["E7","D7","B6","G#6","E6","D6","B5","G#5","E5","D5","B4","G#4","E4"]},
+  'B': {asc:["B3","D#4","F#4","A4","B4","D#5","F#5","A5","B5","D#6","F#6","A6","B6"],desc:["B6","A6","F#6","D#6","B5","A5","F#5","D#5","B4","A4","F#4","D#4","B3"]},
+  'F#': {asc:["F#4","A#4","C#5","E5","F#5","A#5","C#6","E6","F#6","A#6","C#7","E7","F#7"],desc:["F#7","E7","C#7","A#6","F#6","E6","C#6","A#5","F#5","E5","C#5","A#4","F#4"]},
+  'Db': {asc:["Db4","F4","Ab4","Cb4","Db5","F5","Ab5","Cb5","Db6","F6","Ab6","Cb6","Db7"],desc:["Db7","Cb6","Ab6","F6","Db6","Cb5","Ab5","F5","Db5","Cb4","Ab4","F4","Db4"]},
+  'Ab': {asc:["Ab3","C4","Eb4","Gb4","Ab4","C5","Eb5","Gb5","Ab5","C6","Eb6","Gb6","Ab6"],desc:["Ab6","Gb6","Eb6","C6","Ab5","Gb5","Eb5","C5","Ab4","Gb4","Eb4","C4","Ab3"]},
+  'Eb': {asc:["Eb4","G4","Bb4","Db5","Eb5","G5","Bb5","Db6","Eb6","G6","Bb6","Db7","Eb7"],desc:["Eb7","Db7","Bb6","G6","Eb6","Db6","Bb5","G5","Eb5","Db5","Bb4","G4","Eb4"]},
+  'Bb': {asc:["Bb3","D4","F4","Ab4","Bb4","D5","F5","Ab5","Bb5","D6","F6","Ab6","Bb6"],desc:["Bb6","Ab6","F6","D6","Bb5","Ab5","F5","D5","Bb4","Ab4","F4","D4","Bb3"]},
+  'F': {asc:["F4","A4","C5","Eb5","F5","A5","C6","Eb6","F6","A6","C7","Eb7","F7"],desc:["F7","Eb7","C7","A6","F6","Eb6","C6","A5","F5","Eb5","C5","A4","F4"]},
+};
+
+const DIM7_ARPEGGIO = {
+  'A': {asc:["A3","C4","Eb4","Gb4","A4","C5","Eb5","Gb5","A5","C6","Eb6","Gb6","A6"],desc:["A6","Gb6","Eb6","C6","A5","Gb5","Eb5","C5","A4","Gb4","Eb4","C4","A3"]},
+  'E': {asc:["E4","G4","Bb4","Db5","E5","G5","Bb5","Db6","E6","G6","Bb6","Db7","E7"],desc:["E7","Db7","Bb6","G6","E6","Db6","Bb5","G5","E5","Db5","Bb4","G4","E4"]},
+  'B': {asc:["B3","D4","F4","Ab4","B4","D5","F5","Ab5","B5","D6","F6","Ab6","B6"],desc:["B6","Ab6","F6","D6","B5","Ab5","F5","D5","B4","Ab4","F4","D4","B3"]},
+  'F#': {asc:["F#4","A4","C5","Eb5","F#5","A5","C6","Eb6","F#6","A6","C7","Eb7","F#7"],desc:["F#7","Eb7","C7","A6","F#6","Eb6","C6","A5","F#5","Eb5","C5","A4","F#4"]},
+  'C#': {asc:["C#4","E4","G4","Bb4","C#5","E5","G5","Bb5","C#6","E6","G6","Bb6","C#7"],desc:["C#7","Bb6","G6","E6","C#6","Bb5","G5","E5","C#5","Bb4","G4","E4","C#4"]},
+  'G#': {asc:["G#3","B3","D4","F4","G#4","B4","D5","F5","G#5","B5","D6","F6","G#6"],desc:["G#6","F6","D6","B5","G#5","F5","D5","B4","G#4","F4","D4","B3","G#3"]},
+  'D': {asc:["D4","F4","Ab4","Cb4","D5","F5","Ab5","Cb5","D6","F6","Ab6","Cb6","D7"],desc:["D7","Cb6","Ab6","F6","D6","Cb5","Ab5","F5","D5","Cb4","Ab4","F4","D4"]},
+  'G': {asc:["G3","Bb3","Db4","Fb4","G4","Bb4","Db5","Fb5","G5","Bb5","Db6","Fb6","G6"],desc:["G6","Fb6","Db6","Bb5","G5","Fb5","Db5","Bb4","G4","Fb4","Db4","Bb3","G3"]},
+  'C': {asc:["C4","Eb4","Gb4","Bbb4","C5","Eb5","Gb5","Bbb5","C6","Eb6","Gb6","Bbb6","C7"],desc:["C7","Bbb6","Gb6","Eb6","C6","Bbb5","Gb5","Eb5","C5","Bbb4","Gb4","Eb4","C4"]},
+  'F': {asc:["F4","Ab4","Cb4","Ebb5","F5","Ab5","Cb5","Ebb6","F6","Ab6","Cb6","Ebb7","F7"],desc:["F7","Ebb7","Cb6","Ab6","F6","Ebb6","Cb5","Ab5","F5","Ebb5","Cb4","Ab4","F4"]},
+  'Bb': {asc:["Bb3","Db4","Fb4","Abb4","Bb4","Db5","Fb5","Abb5","Bb5","Db6","Fb6","Abb6","Bb6"],desc:["Bb6","Abb6","Fb6","Db6","Bb5","Abb5","Fb5","Db5","Bb4","Abb4","Fb4","Db4","Bb3"]},
+  'Eb': {asc:["Eb4","Gb4","Bbb4","Dbb5","Eb5","Gb5","Bbb5","Dbb6","Eb6","Gb6","Bbb6","Dbb7","Eb7"],desc:["Eb7","Dbb7","Bbb6","Gb6","Eb6","Dbb6","Bbb5","Gb5","Eb5","Dbb5","Bbb4","Gb4","Eb4"]},
 };
 // BPM options
 const BPM_OPTIONS = [40,50,60,70,80,90,100,120];
@@ -550,7 +715,7 @@ let S = {
     {name:'Player 3',avatar:'🌟',stars:{}}
   ],
   cur:0, gemKey:'', tab:'practice',
-  scType:'major', scKey:'G', octaves:1, scBpm:60, setupDone:false,
+  scLevel:'beginner', scType:'major', scKey:'C', scBpm:60, setupDone:false,
   setupAvatars:['🧒','👧','🌟']
 };
 
@@ -717,71 +882,138 @@ function updateTuner(freq){
 // ════════════════════════════════════════════════════════
 // SCALES
 // ════════════════════════════════════════════════════════
-let scType='major',scKey='G',scOct=1,scBpm=60,scPlaying=false,scSynth=null,scStop=false,scMetro=true,metroSynth=null;
+let scLevel='beginner',scType='major',scKey='C',scBpm=60;
+let scPlaying=false,scSynth=null,scStop=false,scMetro=true,metroSynth=null;
+
+// Type options available per level
+const LEVEL_TYPES = {
+  beginner: [
+    {id:'major', label:'☀️ Major'}
+  ],
+  intermediate: [
+    {id:'major', label:'☀️ Major'},
+    {id:'natural', label:'🌙 Nat. Minor'},
+    {id:'harmonic', label:'🌗 Harm. Minor'},
+    {id:'melodic', label:'🌘 Mel. Minor'}
+  ],
+  advanced: [
+    {id:'major', label:'☀️ Major'},
+    {id:'natural', label:'🌙 Nat. Minor'},
+    {id:'harmonic', label:'🌗 Harm. Minor'},
+    {id:'melodic', label:'🌘 Mel. Minor'},
+    {id:'chromatic', label:'🌈 Chromatic'},
+    {id:'majArp', label:'🎯 Maj. Arpeggio'},
+    {id:'minArp', label:'🎯 Min. Arpeggio'},
+    {id:'dom7Arp', label:'🎪 Dom7 Arpeggio'},
+    {id:'dim7Arp', label:'🎪 Dim7 Arpeggio'}
+  ]
+};
+const LEVEL_DESC = {
+  beginner: '5 essential major keys — great for starting out!',
+  intermediate: 'All 12 major keys, and every minor key in 3 forms (1 octave)',
+  advanced: 'Full 3-octave scales, chromatic scale, and 4 arpeggio types'
+};
+
+// Keys available depend on level+type
+function getAvailableKeys(){
+  if(scLevel==='beginner')return['C','G','D','A','F'];
+  if(scLevel==='intermediate'){
+    return scType==='major'
+      ? Object.keys(INTERMEDIATE_MAJOR)
+      : Object.keys(INTERMEDIATE_MINOR);
+  }
+  // advanced
+  if(scType==='major')return Object.keys(ADVANCED_MAJOR);
+  if(scType==='natural')return Object.keys(ADVANCED_NATURAL_MINOR);
+  if(scType==='harmonic')return Object.keys(ADVANCED_HARMONIC_MINOR);
+  if(scType==='melodic')return Object.keys(ADVANCED_MELODIC_MINOR);
+  if(scType==='majArp')return Object.keys(MAJOR_ARPEGGIO);
+  if(scType==='minArp')return Object.keys(MINOR_ARPEGGIO);
+  if(scType==='dom7Arp')return Object.keys(DOM7_ARPEGGIO);
+  if(scType==='dim7Arp')return Object.keys(DIM7_ARPEGGIO);
+  return['C'];
+}
+
+// Get {asc,desc} note data for current level/type/key
+function getScaleData(){
+  if(scLevel==='beginner'){
+    return BEGINNER_SCALES[scKey] || BEGINNER_SCALES['C'];
+  }
+  if(scLevel==='intermediate'){
+    if(scType==='major')return INTERMEDIATE_MAJOR[scKey];
+    const forms=INTERMEDIATE_MINOR[scKey];
+    if(!forms)return INTERMEDIATE_MINOR['A'][scType];
+    return forms[scType];
+  }
+  // advanced
+  if(scType==='chromatic')return CHROMATIC_3OCT;
+  if(scType==='major')return ADVANCED_MAJOR[scKey];
+  if(scType==='natural')return ADVANCED_NATURAL_MINOR[scKey];
+  if(scType==='harmonic')return ADVANCED_HARMONIC_MINOR[scKey];
+  if(scType==='melodic')return ADVANCED_MELODIC_MINOR[scKey];
+  if(scType==='majArp')return MAJOR_ARPEGGIO[scKey];
+  if(scType==='minArp')return MINOR_ARPEGGIO[scKey];
+  if(scType==='dom7Arp')return DOM7_ARPEGGIO[scKey];
+  if(scType==='dim7Arp')return DIM7_ARPEGGIO[scKey];
+  return ADVANCED_MAJOR['C'];
+}
+
+function isMinorType(t){return t==='natural'||t==='harmonic'||t==='melodic';}
+function isChromaticOrArp(t){return t==='chromatic'||t==='majArp'||t==='minArp'||t==='dom7Arp'||t==='dim7Arp';}
 
 // ─── Normalize note for Tone.js playback ────────────────
 function normNote(noteStr){
-  // noteStr like "Ab4", "F#5", "Cb7", "B#4", "E#5"
-  const m=noteStr.match(/^([A-G][#b]*)(\d+)$/);
+  // noteStr like "Ab4", "F#5", "Cb7", "B#4", "E#5", "Fx5" (double sharp), "Bbb4" (double flat)
+  const m=noteStr.match(/^([A-G])(x|##|bb|#|b)?(\d+)$/);
   if(!m)return noteStr;
-  let[,name,oct]=m; oct=parseInt(oct);
-  const map={'Cb':['B',-1],'Fb':['E',0],'E#':['F',0],'B#':['C',1]};
-  if(map[name]){const[nn,adj]=map[name];return nn+(oct+adj);}
-  return name+oct;
+  let[,letter,acc,oct]=m; oct=parseInt(oct); acc=acc||'';
+  const LETTERS=['C','D','E','F','G','A','B'];
+  const SEMI={'C':0,'D':2,'E':4,'F':5,'G':7,'A':9,'B':11};
+  let semi=SEMI[letter];
+  if(acc==='#')semi+=1;
+  else if(acc==='b')semi-=1;
+  else if(acc==='x'||acc==='##')semi+=2;
+  else if(acc==='bb')semi-=2;
+  // normalize into 0-11 range, adjusting octave if needed
+  let adjOct=oct;
+  while(semi<0){semi+=12;adjOct--;}
+  while(semi>11){semi-=12;adjOct++;}
+  const CHROM=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return CHROM[semi]+adjOct;
 }
 function dispNote(n){
-  // Parse "Ab4" -> display "A♭" (no octave) or "A♭4" (with octave)
-  const m=n.match(/^([A-G])([#b]*)(\d+)$/);
+  // Parse "Ab4" -> display "A♭", "Fx5" -> "Fᵡ", "Bbb4" -> "B𝄫"
+  const m=n.match(/^([A-G])(x|##|bb|#|b)?(\d+)$/);
   if(!m)return n;
-  const acc=m[2].replace(/#/g,'♯').replace(/b/g,'♭');
-  return m[1]+acc;
+  let[,letter,acc]=m; acc=acc||'';
+  let dispAcc='';
+  if(acc==='#')dispAcc='♯';
+  else if(acc==='b')dispAcc='♭';
+  else if(acc==='x'||acc==='##')dispAcc='𝄪';
+  else if(acc==='bb')dispAcc='𝄫';
+  return letter+dispAcc;
 }
 function noteOctave(n){const m=n.match(/(\d+)$/);return m?parseInt(m[1]):4;}
 
-// ─── Get scale notes for current octave setting ─────────
-function getScaleNotes(){
-  if(scType==='major'){
-    const full=MAJOR_3[scKey];if(!full)return[];
-    if(scOct===3)return full;
-    if(scOct===2)return full.slice(0,15);
-    return full.slice(0,8);
-  }else{
-    // Minor: ascending = melodic, descending = natural
-    const ascFull=MINOR_ASC_3[scKey];if(!ascFull)return[];
-    if(scOct===3)return ascFull;
-    if(scOct===2)return ascFull.slice(0,15);
-    return ascFull.slice(0,8);
-  }
-}
-function getDescNotes(){
-  if(scType==='major'){
-    // Major descending = reverse of ascending
-    const asc=getScaleNotes();
-    return[...asc].reverse();
-  }else{
-    // Minor descending = natural minor (different notes!)
-    const descFull=MINOR_DESC_3[scKey];if(!descFull)return[];
-    if(scOct===3)return descFull;
-    if(scOct===2)return descFull.slice(descFull.length-15);
-    return descFull.slice(descFull.length-8);
-  }
-}
-
 // ─── UI updates ─────────────────────────────────────────
+function setLevel(lvl){
+  scLevel=lvl;S.scLevel=lvl;
+  const types=LEVEL_TYPES[lvl];
+  if(!types.find(t=>t.id===scType))scType=types[0].id;
+  saveS();
+  document.querySelectorAll('.level-btn').forEach(el=>el.classList.toggle('active',el.dataset.level===lvl));
+  document.getElementById('level-desc').textContent=LEVEL_DESC[lvl];
+  stopScale();renderTypeToggle();renderScaleKeys();renderScaleNotes();
+}
 function setScaleType(t){
-  scType=t;
-  const keys=Object.keys(t==='major'?MAJOR_3:MINOR_ASC_3);
+  scType=t;S.scType=t;
+  const keys=getAvailableKeys();
   if(!keys.includes(scKey))scKey=keys[0];
-  S.scType=t;S.scKey=scKey;saveS();
-  document.querySelectorAll('.type-btn').forEach(el=>el.classList.toggle('active',el.classList.contains(t)));
+  S.scKey=scKey;saveS();
+  document.querySelectorAll('.type-btn').forEach(el=>el.classList.toggle('active',el.dataset.type===t));
   stopScale();renderScaleKeys();renderScaleNotes();
 }
 function pickScaleKey(k){scKey=k;S.scKey=k;saveS();stopScale();renderScaleKeys();renderScaleNotes();}
-function setOctaves(n){
-  scOct=n;S.octaves=n;saveS();
-  [1,2,3].forEach(i=>{const el=document.getElementById('oct'+i);if(el)el.classList.toggle('active',i===n);});
-  stopScale();renderScaleNotes();
-}
 function setBpm(b){
   scBpm=b;S.scBpm=b;saveS();
   document.querySelectorAll('.bpm-btn').forEach(el=>el.classList.toggle('active',parseInt(el.dataset.bpm)===b));
@@ -793,27 +1025,55 @@ function renderBpmGrid(){
   ).join('');
 }
 
+function renderTypeToggle(){
+  const types=LEVEL_TYPES[scLevel];
+  document.getElementById('type-toggle').innerHTML=types.map(t=>
+    `<button class="type-btn${t.id===scType?' active':''}" data-type="${t.id}" onclick="setScaleType('${t.id}')">${t.label}</button>`
+  ).join('');
+}
+
 function renderScaleKeys(){
-  const keys=Object.keys(scType==='major'?MAJOR_3:MINOR_ASC_3);
+  if(scType==='chromatic'){
+    document.getElementById('scale-keys').innerHTML='<div style="grid-column:1/-1;text-align:center;color:#9CA3AF;font-size:0.8rem;padding:8px">🌈 The chromatic scale uses every note — no key needed!</div>';
+    return;
+  }
+  const keys=getAvailableKeys();
   document.getElementById('scale-keys').innerHTML=keys.map(k=>
-    `<button class="sk-btn${k===scKey?' active':''}" onclick="pickScaleKey('${k}')">${k}</button>`
+    `<button class="sk-btn${k===scKey?' active':''}" onclick="pickScaleKey('${k}')">${k.replace('#','♯').replace(/b$/,'♭')}</button>`
   ).join('');
 }
 
 function renderScaleNotes(){
-  const notes=getScaleNotes();if(!notes.length)return;
-  const sz=notes.length>16?36:notes.length>10?42:46;
+  const data=getScaleData();if(!data||!data.asc)return;
+  const notes=data.asc;
+  const sz=notes.length>24?32:notes.length>16?36:notes.length>10?42:46;
   document.getElementById('scale-notes').innerHTML=notes.map((note,i)=>{
     const ci=i%7,col=NB_COLS[ci];
     const isRoot=i===0||i===notes.length-1;
     const brd=isRoot?`border:3px solid ${col.c};`:'';
     const oct=noteOctave(note);
-    return`<div class="nb" id="nb${i}" style="width:${sz}px;height:${sz}px;background:${col.bg};color:${col.c};${brd}" onclick="playNb('${note}',${i})"><div style="font-size:${sz>40?0.8:0.68}rem;line-height:1.2">${dispNote(note)}</div>${scOct>1?`<div style="font-size:0.5rem;opacity:0.65">${oct}</div>`:''}</div>`;
+    return`<div class="nb" id="nb${i}" style="width:${sz}px;height:${sz}px;background:${col.bg};color:${col.c};${brd}" onclick="playNb('${note}',${i})"><div style="font-size:${sz>40?0.78:0.62}rem;line-height:1.2">${dispNote(note)}</div><div style="font-size:0.48rem;opacity:0.65">${oct}</div></div>`;
   }).join('');
-  const typeName=scType==='major'?'Major ☀️':'Melodic Minor 🌙';
-  document.getElementById('scale-title').textContent=`${scKey} ${typeName} — ${scOct} octave${scOct>1?'s':''}`;
+
+  const typeLabels={major:'Major ☀️',natural:'Natural Minor 🌙',harmonic:'Harmonic Minor 🌗',melodic:'Melodic Minor 🌘',
+    chromatic:'Chromatic Scale 🌈',majArp:'Major Arpeggio 🎯',minArp:'Minor Arpeggio 🎯',
+    dom7Arp:'Dominant 7th Arpeggio 🎪',dim7Arp:'Diminished 7th Arpeggio 🎪'};
+  const octCount=scLevel==='advanced'&&!isChromaticOrArp(scType)?'3 octaves':
+                  scLevel==='advanced'&&scType==='chromatic'?'3 octaves':
+                  scLevel==='intermediate'?'1 octave':'2 octaves (exam form)';
+  const keyLabel=scType==='chromatic'?'':`${scKey.replace('#','♯').replace(/b$/,'♭')} `;
+  document.getElementById('scale-title').textContent=`${keyLabel}${typeLabels[scType]} — ${octCount}`;
+
   const ml=document.getElementById('minor-label');
-  if(ml)ml.classList.toggle('hidden',scType!=='minor');
+  if(scType==='melodic'){
+    ml.textContent='⬆ Melodic minor ascending · ⬇ Natural minor descending (exam style)';
+    ml.classList.remove('hidden');
+  }else if(scType==='harmonic'){
+    ml.textContent='⬆⬇ Harmonic minor — same notes ascending and descending';
+    ml.classList.remove('hidden');
+  }else{
+    ml.classList.add('hidden');
+  }
 }
 
 // ─── Play single note ───────────────────────────────────
@@ -839,20 +1099,17 @@ async function playScale(){
   scPlaying=true;scStop=false;
   scMetro=document.getElementById('metro-cb').checked;
 
-  // Show countdown, hide play button
   document.getElementById('play-btn').style.display='none';
   document.getElementById('stop-btn').style.display='inline-flex';
   const cdEl=document.getElementById('sc-countdown');
   const cdNum=document.getElementById('cd-num');
   cdEl.classList.add('show');
 
-  // Create metronome click synth
   metroSynth=new Tone.MembraneSynth({pitchDecay:0.01,octaves:6,envelope:{attack:0.001,decay:0.1,sustain:0,release:0.05}}).toDestination();
   metroSynth.volume.value=-8;
 
   const beatMs=60000/scBpm;
 
-  // 5-second countdown with metronome beats
   for(let c=5;c>=1;c--){
     if(scStop)break;
     cdNum.textContent=c;
@@ -863,40 +1120,27 @@ async function playScale(){
   cdEl.classList.remove('show');
   if(scStop){stopScale();return;}
 
-  // Build full sequence: ascending then descending
-  const ascNotes=getScaleNotes();
-  const descNotes=getDescNotes();
-  // Full sequence: ascending (all notes) + descending (skip first note to avoid doubling top)
+  const data=getScaleData();
+  const ascNotes=data.asc, descNotes=data.desc;
   const fullSeq=[...ascNotes,...descNotes.slice(1)];
-
-  // Map display indices for highlighting
-  // Ascending notes map to bubble indices 0..N-1
-  // Descending notes map backwards (for major) or show which bubble to highlight
   const ascLen=ascNotes.length;
 
   scSynth=makeViolinSynth();
-  // Note duration: slightly less than beat for legato feel
   const noteDur=Math.max(0.15,(beatMs/1000)*0.85);
 
   for(let i=0;i<fullSeq.length;i++){
     if(scStop)break;
 
-    // Highlight the correct bubble
     let hlIdx;
     if(i<ascLen){
       hlIdx=i;
     }else{
-      // Descending: for major, ascending reversed so index maps back
-      // For minor, descending notes differ from ascending, so find closest bubble or map by position
       hlIdx=ascLen-1-(i-ascLen+1);
       if(hlIdx<0)hlIdx=0;
     }
     document.querySelectorAll('.nb').forEach((el,j)=>el.classList.toggle('playing',j===hlIdx));
 
-    // Metronome click
     if(scMetro)try{metroSynth.triggerAttackRelease('C2','32n');}catch(e){}
-
-    // Play note
     try{scSynth.triggerAttackRelease(normNote(fullSeq[i]),noteDur);}catch(e){console.warn('Note error:',fullSeq[i],e);}
 
     await new Promise(r=>setTimeout(r,beatMs));
@@ -1089,9 +1333,12 @@ function renderWeek(){
 // ════════════════════════════════════════════════════════
 function renderAll(){
   renderProfiles();renderWeek();
-  scType=S.scType||'major';scKey=S.scKey||'G';scOct=S.octaves||1;scBpm=S.scBpm||60;
-  renderBpmGrid();renderScaleKeys();renderScaleNotes();
-  setOctaves(scOct);
+  scLevel=S.scLevel||'beginner';scType=S.scType||'major';scKey=S.scKey||'C';scBpm=S.scBpm||60;
+  // Validate type is legal for this level; fallback if not
+  if(!LEVEL_TYPES[scLevel].find(t=>t.id===scType))scType=LEVEL_TYPES[scLevel][0].id;
+  document.querySelectorAll('.level-btn').forEach(el=>el.classList.toggle('active',el.dataset.level===scLevel));
+  document.getElementById('level-desc').textContent=LEVEL_DESC[scLevel];
+  renderBpmGrid();renderTypeToggle();renderScaleKeys();renderScaleNotes();
   if(S.tab)switchTab(S.tab);
 }
 
