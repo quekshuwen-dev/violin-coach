@@ -78,9 +78,9 @@
 <!-- ══ ANALYZING ═════════════════════════════════════════ -->
 <div id="analyzing">
   <span class="spin">🎻</span>
-  <h3>Analysing your playing...</h3>
-  <p>Gemini AI is reviewing your performance!</p>
-  <p style="margin-top:4px;color:#C4B5FD">This may take 10–15 seconds</p>
+  <h3 id="an-title">Analysing your playing...</h3>
+  <p id="an-text">Listening to every note of your scale</p>
+  <div class="an-progress"><div class="an-bar" id="an-bar"></div></div>
 </div>
 
 <!-- ══ HEADER ════════════════════════════════════════════ -->
@@ -115,6 +115,10 @@
   <div id="practice-tab" class="tab-pane active">
     <div class="card">
       <p class="ctitle">🎻 Practice Session</p>
+      <div class="pr-scale">
+        <div class="pr-scale-txt"><p class="pr-scale-lbl">Checking this scale</p><p class="sc-title" id="sc-title"></p><p class="sc-sub" id="sc-sub"></p></div>
+        <button class="btn btn-gray sc-change" data-action="scChange">Change</button>
+      </div>
       <div class="inp-toggle">
         <button class="inp-tab active" data-action="switchInput" data-mode="check">🎼 Scale Check</button>
         <button class="inp-tab" data-action="switchInput" data-mode="camera">📷 Camera</button>
@@ -123,10 +127,6 @@
 
       <!-- Scale Check: listen while the child plays, judge every note -->
       <div id="check-section">
-        <div class="sc-head">
-          <div class="sc-head-txt"><p class="sc-title" id="sc-title"></p><p class="sc-sub" id="sc-sub"></p></div>
-          <button class="btn btn-gray sc-change" data-action="scChange">Change</button>
-        </div>
         <div id="sc-bubbles" class="sc-bubbles"></div>
         <div id="sc-live" class="sc-live hidden">
           <div class="sc-next-row">Now play: <b id="sc-next"></b></div>
@@ -148,12 +148,13 @@
           <div id="rec-badge"><div class="rec-dot"></div>REC <span id="rec-timer">0:00</span></div>
         </div>
         <button class="btn btn-purple btn-full btn-lg" id="cam-btn" data-action="handleCamBtn">📷 Start Camera</button>
+        <p class="cam-note">Record the scale above. When you stop, the app checks every note and gives a stamp for 3 stars or more.</p>
       </div>
       <div id="up-section" class="hidden">
         <div id="upload-area" data-action="pickFile">
           <div class="up-icon">🎬</div>
           <p style="font-weight:700;color:#4B5563;margin-bottom:4px">Tap to choose a video</p>
-          <p style="color:#9CA3AF;font-size:0.82rem">MP4, MOV, or WebM</p>
+          <p style="color:#9CA3AF;font-size:0.82rem">MP4, MOV, or WebM of the scale above</p>
         </div>
         <input type="file" id="file-in" accept="video/*" data-change="handleUpload">
         <div id="vid-preview-wrap" class="hidden">
@@ -165,9 +166,12 @@
     </div>
 
     <div class="card" id="feedback-card">
+      <p class="score-lbl">Result for <span id="fb-pname"></span></p>
+      <div id="fb-scale"></div>
+      <div id="fb-ai" class="hidden">
+      <p class="fb-section-lbl">🤖 AI teacher</p>
       <div class="fb-header">
         <div>
-          <p class="score-lbl">Score for <span id="fb-pname"></span></p>
           <div class="stars-row" id="fb-stars"></div>
           <p class="score-big" id="fb-score"></p>
         </div>
@@ -185,6 +189,8 @@
         <div class="imp-box"><p class="imp-lbl">💡 Work on this</p><div id="fb-imp"></div></div>
       </div>
       <div class="enc-box" id="fb-enc"></div>
+      </div>
+      <div id="fb-ai-err" class="fb-ai-err hidden"></div>
     </div>
 
     <div class="card">
@@ -196,7 +202,7 @@
       <div class="cal-stats" id="cal-stats"></div>
       <div class="cal-dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <p class="cal-legend">✓ a scale played correctly that day · ★ practice feedback</p>
+      <p class="cal-legend">🎻 stamp = a scale scored 3 stars or more that day · ★ = tried, not yet 3 stars</p>
     </div>
   </div>
 

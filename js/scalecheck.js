@@ -1,12 +1,13 @@
 // Scale Check: the child plays the chosen scale; we listen, judge every
 // note (right / flat / sharp / wrong / skipped), show it live on the
-// bubbles, and give kid-friendly feedback. A correct scale earns a tick
-// on the practice calendar.
+// bubbles, and give kid-friendly feedback. 3+ stars earns a stamp on the
+// practice calendar.
 import {S,logPractice,$} from './state.js';
 import {onAction,runAction} from './actions.js';
 import {detectPitch} from './pitch.js';
 import {openMic} from './mic.js';
-import {NoteTracker,ScaleMatcher,prettyName,spellMidi} from './notecheck.js';
+import {NoteTracker,ScaleMatcher,prettyName} from './notecheck.js';
+import {resultHTML,earnsStamp} from './scaleresult.js';
 import {freqToNote} from './notes.js';
 import {currentScale,bubblesHTML,ensureAudio,onScaleChange,prettyKey} from './scales.js';
 import {playSequence,stopPlayback,isPlaying} from './playback.js';
@@ -20,7 +21,7 @@ export function renderScaleCheck(){
   if(listening)stopCheck(false);
   sc=currentScale();
   $('sc-title').textContent=sc.title;
-  $('sc-sub').textContent=`${LEVEL_NAMES[sc.level]} · ${sc.seq.length} notes up and down · change it on the Scales tab`;
+  $('sc-sub').textContent=`${LEVEL_NAMES[sc.level]} · ${sc.seq.length} notes up and down`;
   $('sc-bubbles').innerHTML=bubblesHTML(sc.seq,sc.ascLen,{action:'playNb',size:sc.seq.length>24?30:sc.seq.length>16?34:40});
   $('sc-result').classList.add('hidden');$('sc-live').classList.add('hidden');
   setHint('Listen to it first, then press Start and play the scale slowly, one clear note at a time.');
@@ -95,32 +96,18 @@ function finishCheck(){
   matcher.results.forEach((_,i)=>paint(i));
   bubbles().forEach(el=>el.classList.remove('nb-next'));
   $('sc-live').classList.add('hidden');
-  const correct=s.played>0&&s.right===s.total;
-  logPractice(S.cur,{correct,stars:s.stars,label:sc.title.split(' — ')[0]});
+  const stamp=earnsStamp(s);
+  logPractice(S.cur,{stamp,stars:s.stars,label:sc.title.split(' — ')[0]});
   renderCalendar();
-  const starsHTML=[1,2,3,4,5].map(i=>`<span class="star-ic ${i<=Math.round(s.stars)?'star-full':'star-empty'}">${i<=s.stars?'★':i-0.5===s.stars?'★':'☆'}</span>`).join('');
-  const head=correct?`<div class="sc-tick">✓ Correct scale — a tick on your calendar!</div>`:'';
-  const legend=`<div class="sc-legend"><span class="lg nb-ok">in tune</span><span class="lg nb-flat">flat ↓</span><span class="lg nb-sharp">sharp ↑</span><span class="lg nb-wrong">wrong</span><span class="lg nb-missed">skipped</span></div>`;
-  const notes=matcher.results.map((r,i)=>{
-    const nm=prettyName(sc.seq[i]);
-    const c=['ok','flat','sharp'].includes(r.status)?` <small>${r.cents>=0?'+':'−'}${Math.abs(r.cents).toFixed(0)}¢</small>`:'';
-    const played=['wrong','octave'].includes(r.status)?` <small>→ ${spellMidi(r.playedMidi,matcher.preferFlats)}</small>`:'';
-    return`<span class="sc-note nb-${r.status==='notPlayed'?'missed':r.status}">${nm}${c}${played}</span>`;
-  }).join('');
-  $('sc-result').innerHTML=`
-    ${head}
-    <div class="sc-score"><div class="stars-row">${starsHTML}</div><div class="sc-score-txt">${s.right} of ${s.total} right · ${s.inTune} in tune</div></div>
-    <div class="sc-comments">${s.comments.map(c=>`<p><span class="sc-ico">${c.icon}</span>${c.text}</p>`).join('')}</div>
-    ${legend}
-    <div class="sc-notes">${notes}</div>
+  $('sc-result').innerHTML=resultHTML({matcher,summary:s,names:sc.seq,stamp,extra:`
     <div class="sc-btns">
       <button class="btn btn-purple" data-action="scHear">🔊 Hear it again</button>
       <button class="btn btn-green" data-action="scStart">🔁 Try again</button>
       ${S.gemKey?'<button class="btn btn-pink" data-action="scAskAI">🤖 Ask the AI teacher</button>':''}
-    </div>`;
+    </div>`});
   $('sc-result').classList.remove('hidden');
   $('sc-result').scrollIntoView({behavior:'smooth',block:'nearest'});
-  setHint(correct?'Brilliant! Try a faster tempo or a new key on the Scales tab.':'Look at the coloured notes, listen again, and have another go.');
+  setHint(stamp?'Stamp earned! Try a faster tempo or a new key on the Scales tab.':'Look at the coloured notes, listen again, and have another go.');
 }
 export function stopScaleCheck(){stopPlayback();if(listening)stopCheck(false);}
 

@@ -36,28 +36,43 @@ Runs the scale-table validator (every scale checked against its interval
 pattern and the violin's range), note-spelling tests, and pitch detector
 accuracy tests on synthetic violin-like signals.
 
-## Scale Check (Practice tab)
+## Practice tab: three ways to check a scale
 
-1. Pick a scale on the Scales tab (level, type, key, tempo).
-2. On the Practice tab press **Hear it** to listen to a real violin play it.
-3. Press **Start** and play the scale slowly, one clear note at a time.
-   The next note to play pulses; every note turns green (in tune), amber
-   (a little flat or sharp), red (wrong note) or grey (skipped) as it is heard.
-4. Press **Finished** (or the app finishes when the last note is played) to see
-   stars, a list of every note with its cents error, and simple finger tips
-   ("F♯4 was a little flat, slide that finger a tiny bit towards the bridge").
+The scale being checked is shown at the top (change it on the Scales tab).
 
-A scale with every note right earns a ✓ on that day of the calendar; the
-calendar also counts days practised and the current streak. With a Gemini
-key set, **Ask the AI teacher** sends the measured per-note report for a
-warm, worded comment (it uses the measured facts only).
+- **Scale Check (live)**: press **Hear it** to listen to a real violin play
+  it, then **Start** and play slowly, one clear note at a time. The next note
+  pulses; every note turns green (in tune), amber (a little flat or sharp),
+  red (wrong note) or grey (skipped) as it is heard.
+- **Camera**: record the child playing the scale. When you stop, the audio is
+  decoded and every note is checked the same way; a frame is kept for the
+  AI's posture comment.
+- **Upload**: choose a video of the scale (MP4, MOV, WebM); its audio is
+  analysed the same way. **Choose Different Video** lets you upload another.
+
+Every path ends with stars, a list of each note with its cents error, and
+simple finger tips ("F♯4 was a little flat, slide that finger a tiny bit
+towards the bridge"). The judgement is local and works offline.
+
+**Stamps**: a scale analysed at **3, 4 or 5 stars** puts a 🎻 stamp on that
+day of the calendar (several in one day show ×2, ×3…). A day that was tried
+but did not reach 3 stars shows a small ★. The calendar counts days
+practised this month, stamps, and the current streak.
+
+With a Gemini key set, the measured per-note report (and the camera frame)
+go to the AI teacher for a worded comment. It is told to use only the
+measured facts and to name the notes. If the AI call fails, the reason is
+shown in the card instead of a canned comment; the local result still counts.
 
 How it judges: raw microphone → McLeod pitch detector → notes that hold a
 steady pitch for 110 ms become note events → matched in order against the
 scale (a wrong note followed by the right one counts as corrected; skipping
 ahead marks the skipped note; an octave slip is called out). In tune is
-within ±15 cents, "a little" flat/sharp up to ±35 cents. Logic lives in
-`js/notecheck.js` with tests in `tests/notecheck.test.js`.
+within ±15 cents, "a little" flat/sharp up to ±35 cents. Stars: 5 all right
+and ≥90 % in tune, 4–4.5 all right, 3 at least 75 % right, 2 at least half.
+Logic lives in `js/notecheck.js` (matching) and `js/analyze.js` (recordings,
+analysed at 32 kHz with 4096-sample windows every 40 ms) with tests in
+`tests/`.
 
 ## Violin sound
 
@@ -87,7 +102,9 @@ js/playback.js        sequence player with count-in, clicks, bubble highlights
 js/scales.js          scale explorer tab
 js/scales-data.js     verified scale/arpeggio tables
 js/notecheck.js       note tracking + scale matching + grading + comments
-js/scalecheck.js      Scale Check screen
+js/scalecheck.js      live Scale Check screen
+js/analyze.js         decode a recording and check it offline
+js/scaleresult.js     shared result rendering + stamp rule
 js/practice.js        input modes, camera/upload, Gemini feedback
 js/ui.js              profile bar, practice calendar, toast
 samples/violin/       pitch-corrected violin recordings (CC BY 3.0)
@@ -111,6 +128,15 @@ tests/                node --test suites
 
 ## AI feedback
 
-Practice feedback uses the Gemini API with a key you paste into Settings.
-The key is stored in this browser's local storage only and is sent only to
-Google's API. Everything else works offline.
+The AI teacher comment uses the Gemini API with a key you paste into
+Settings. The app lists the models available to that key and picks the
+newest Flash model, so it keeps working as model names change. The key is
+stored in this browser's local storage only and is sent only to Google's
+API. Everything else works offline.
+
+## Updates
+
+`sw.js` precaches the whole app and serves the page and its scripts from
+the same cached version, so they can never mismatch. A new deploy installs
+in the background and takes over on the next launch; an **Update** toast
+offers to reload sooner.

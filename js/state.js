@@ -52,28 +52,30 @@ export function setDayStars(pi,di,v){
 }
 
 // ─── Practice log (per profile, per day) ────────────────
-// log[YYYY-MM-DD] = {ticks, stars, scales:[label]}; a tick = a scale played correctly
-export function logPractice(pi,{correct=false,stars=0,label=''}={},date=new Date()){
+// log[YYYY-MM-DD] = {stamps, stars, scales:[label]}
+// A stamp = a scale (live check, camera or uploaded video) analysed at 3+ stars.
+export function logPractice(pi,{stamp=false,stars=0,label=''}={},date=new Date()){
   const p=S.profiles[pi],k=dateKey(date);
-  const e=p.log[k]||(p.log[k]={ticks:0,stars:0,scales:[]});
-  if(correct){e.ticks++;if(label&&!e.scales.includes(label))e.scales.push(label);}
+  const e=p.log[k]||(p.log[k]={stamps:0,stars:0,scales:[]});
+  if(e.ticks&&!e.stamps){e.stamps=e.ticks;delete e.ticks;}   // migrate v2.1 entries
+  if(stamp){e.stamps=(e.stamps||0)+1;if(label&&!e.scales.includes(label))e.scales.push(label);}
   e.stars=Math.max(e.stars||0,stars||0);
   const di=todayIdx();if(di>=0&&stars>0&&k===dateKey())setDayStars(pi,di,stars);
   saveS();
   return e;
 }
-export function getLog(pi){return S.profiles[pi].log||{};}
+export function getLog(pi){const log=S.profiles[pi].log||{};for(const k in log){const e=log[k];if(e.ticks&&!e.stamps){e.stamps=e.ticks;delete e.ticks;}}return log;}
 // Consecutive days with a tick, ending today or yesterday
 export function currentStreak(pi,today=new Date()){
   const log=getLog(pi);let d=new Date(today);let n=0;
-  if(!(log[dateKey(d)]?.ticks>0))d.setDate(d.getDate()-1);
-  while(log[dateKey(d)]?.ticks>0){n++;d.setDate(d.getDate()-1);}
+  if(!(log[dateKey(d)]?.stamps>0))d.setDate(d.getDate()-1);
+  while(log[dateKey(d)]?.stamps>0){n++;d.setDate(d.getDate()-1);}
   return n;
 }
 export function monthStats(pi,year,month){
-  const log=getLog(pi);let days=0,ticks=0;
-  for(const k in log){const [y,m]=k.split('-').map(Number);if(y===year&&m===month+1&&log[k].ticks>0){days++;ticks+=log[k].ticks;}}
-  return{days,ticks};
+  const log=getLog(pi);let days=0,stamps=0;
+  for(const k in log){const [y,m]=k.split('-').map(Number);if(y===year&&m===month+1&&log[k].stamps>0){days++;stamps+=log[k].stamps;}}
+  return{days,stamps};
 }
 export function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 export const $=id=>document.getElementById(id);
