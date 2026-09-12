@@ -5,11 +5,11 @@ const KEY='vsc3';
 
 export const S={
   profiles:[
-    {name:'Player 1',avatar:'🧒',stars:{}},
-    {name:'Player 2',avatar:'👧',stars:{}},
-    {name:'Player 3',avatar:'🌟',stars:{}}
+    {name:'Player 1',avatar:'🧒',stars:{},log:{}},
+    {name:'Player 2',avatar:'👧',stars:{},log:{}},
+    {name:'Player 3',avatar:'🌟',stars:{},log:{}}
   ],
-  cur:0,gemKey:'',tab:'practice',
+  cur:0,gemKey:'',tab:'practice',inputMode:'check',
   scLevel:'beginner',scType:'major',scKey:'C',scBpm:60,setupDone:false,
   setupAvatars:['🧒','👧','🌟'],
   a4:440,          // reference pitch in Hz (440 standard, 442/443 common in orchestras)
@@ -21,7 +21,8 @@ export function loadS(){
     const d=localStorage.getItem(KEY);
     if(d){
       Object.assign(S,JSON.parse(d));
-      while(S.profiles.length<3)S.profiles.push({name:'Player '+(S.profiles.length+1),avatar:'🌟',stars:{}});
+      while(S.profiles.length<3)S.profiles.push({name:'Player '+(S.profiles.length+1),avatar:'🌟',stars:{},log:{}});
+      S.profiles.forEach(p=>{p.stars=p.stars||{};p.log=p.log||{};});
       if(!(S.a4>=400&&S.a4<=480))S.a4=440;
     }
   }catch(e){/* corrupted storage: keep defaults */}
@@ -29,10 +30,13 @@ export function loadS(){
 export function saveS(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 export function clearS(){try{localStorage.removeItem(KEY);}catch(e){}}
 
+// ─── Dates ──────────────────────────────────────────────
+const pad=n=>String(n).padStart(2,'0');
+export function dateKey(d=new Date()){return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
 export function weekKey(){
   const n=new Date(),d=n.getDay(),m=new Date(n);
   m.setDate(n.getDate()-(d===0?6:d-1));
-  return`${m.getFullYear()}-${String(m.getMonth()+1).padStart(2,'0')}-${String(m.getDate()).padStart(2,'0')}`;
+  return dateKey(m);
 }
 export function todayIdx(){const d=new Date().getDay();return(d===0||d===6)?-1:d-1;}
 export function getWeekStars(pi){
@@ -45,6 +49,31 @@ export function setDayStars(pi,di,v){
   if(!p.stars[wk])p.stars[wk]={};
   p.stars[wk][di]=Math.max(p.stars[wk][di]||0,v);
   saveS();
+}
+
+// ─── Practice log (per profile, per day) ────────────────
+// log[YYYY-MM-DD] = {ticks, stars, scales:[label]}; a tick = a scale played correctly
+export function logPractice(pi,{correct=false,stars=0,label=''}={},date=new Date()){
+  const p=S.profiles[pi],k=dateKey(date);
+  const e=p.log[k]||(p.log[k]={ticks:0,stars:0,scales:[]});
+  if(correct){e.ticks++;if(label&&!e.scales.includes(label))e.scales.push(label);}
+  e.stars=Math.max(e.stars||0,stars||0);
+  const di=todayIdx();if(di>=0&&stars>0&&k===dateKey())setDayStars(pi,di,stars);
+  saveS();
+  return e;
+}
+export function getLog(pi){return S.profiles[pi].log||{};}
+// Consecutive days with a tick, ending today or yesterday
+export function currentStreak(pi,today=new Date()){
+  const log=getLog(pi);let d=new Date(today);let n=0;
+  if(!(log[dateKey(d)]?.ticks>0))d.setDate(d.getDate()-1);
+  while(log[dateKey(d)]?.ticks>0){n++;d.setDate(d.getDate()-1);}
+  return n;
+}
+export function monthStats(pi,year,month){
+  const log=getLog(pi);let days=0,ticks=0;
+  for(const k in log){const [y,m]=k.split('-').map(Number);if(y===year&&m===month+1&&log[k].ticks>0){days++;ticks+=log[k].ticks;}}
+  return{days,ticks};
 }
 export function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 export const $=id=>document.getElementById(id);

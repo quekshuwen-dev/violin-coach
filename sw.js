@@ -1,12 +1,14 @@
 // Service worker: precache the app shell so everything except AI feedback
 // works offline. Bump VERSION whenever any precached file changes.
-const VERSION='v2.0.0';
+const VERSION='v2.1.0';
 const CACHE='violin-coach-'+VERSION;
 const SHELL=[
   './','./index.html','./manifest.webmanifest','./css/app.css',
-  './js/app.js','./js/actions.js','./js/state.js','./js/ui.js','./js/notes.js','./js/pitch.js',
-  './js/audio.js','./js/scales.js','./js/scales-data.js','./js/tuner.js','./js/practice.js',
+  './js/app.js','./js/actions.js','./js/state.js','./js/ui.js','./js/notes.js','./js/pitch.js','./js/mic.js',
+  './js/audio.js','./js/playback.js','./js/scales.js','./js/scales-data.js','./js/tuner.js',
+  './js/practice.js','./js/notecheck.js','./js/scalecheck.js',
   './vendor/Tone.js',
+  ...['G3','A3','C4','E4','G4','A4','C5','E5','G5','A5','C6','E6','G6','A6','C7'].map(n=>'./samples/violin/'+n+'.mp3'),
   './icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-maskable-512.png','./icons/apple-touch-icon.png'
 ];
 

@@ -1,10 +1,11 @@
 // App bootstrap: state, setup screen, profiles, settings, tabs, PWA wiring.
 import {S,loadS,saveS,clearS,AVATARS,esc,$} from './state.js';
 import {installDelegation,onAction} from './actions.js';
-import {renderProfiles,renderWeek,toast} from './ui.js';
+import {renderProfiles,renderCalendar,initCalendar,toast} from './ui.js';
 import {initScales,stopScale} from './scales.js';
 import {initTuner,stopTuner,renderStrings} from './tuner.js';
-import {initPractice} from './practice.js';
+import {initPractice,setModeHooks} from './practice.js';
+import {initScaleCheck,stopScaleCheck} from './scalecheck.js';
 
 // ─── Setup screen ───────────────────────────────────────
 let setupAv=[];
@@ -20,7 +21,7 @@ function saveSetup(){
 }
 
 // ─── Profiles ───────────────────────────────────────────
-function selectProfile(i){S.cur=i;saveS();renderProfiles();renderWeek();}
+function selectProfile(i){S.cur=i;saveS();renderProfiles();renderCalendar();}
 
 // ─── Settings ───────────────────────────────────────────
 const A4_PRESETS=[440,441,442,443];
@@ -69,6 +70,8 @@ function switchTab(t){
   document.querySelectorAll('.nav-btn').forEach(el=>el.classList.toggle('active',el.dataset.tab===t));
   if(t!=='tuner')stopTuner();
   if(t!=='scales')stopScale();
+  if(t!=='practice')stopScaleCheck();
+  window.scrollTo({top:0});
 }
 
 // ─── PWA: service worker + install prompt ───────────────
@@ -78,7 +81,6 @@ function setupPWA(){
   window.addEventListener('appinstalled',()=>{deferredInstall=null;$('install-btn').classList.add('hidden');});
   if(!('serviceWorker' in navigator))return;
   navigator.serviceWorker.register('./sw.js').then(reg=>{
-    // A new version was installed in the background: offer a reload
     reg.addEventListener('updatefound',()=>{
       const nw=reg.installing;
       nw?.addEventListener('statechange',()=>{
@@ -87,23 +89,18 @@ function setupPWA(){
       });
     });
   }).catch(e=>console.warn('SW registration failed',e));
-  // Reload only for a user-requested update, never when the worker first
-  // claims the page on the initial visit.
+  // Reload only for a user-requested update, never when the worker first claims the page
   let refreshing=false;
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!updateRequested||refreshing)return;refreshing=true;location.reload();});
 }
 async function promptInstall(){
   if(!deferredInstall)return;
-  deferredInstall.prompt();
-  await deferredInstall.userChoice;
+  deferredInstall.prompt();await deferredInstall.userChoice;
   deferredInstall=null;$('install-btn').classList.add('hidden');
 }
 
 // ─── Boot ───────────────────────────────────────────────
-function renderAll(){
-  renderProfiles();renderWeek();renderStrings();
-  switchTab(S.tab||'practice');
-}
+function renderAll(){renderProfiles();renderCalendar();renderStrings();switchTab(S.tab||'practice');}
 function boot(){
   loadS();
   installDelegation();
@@ -120,7 +117,8 @@ function boot(){
     switchTab:d=>switchTab(d.tab),
     promptInstall:()=>promptInstall()
   });
-  initScales();initTuner();initPractice();
+  initCalendar();initScales();initTuner();initPractice();initScaleCheck();
+  setModeHooks({leaveCheck:stopScaleCheck});
   setupPWA();
   if(!S.setupDone){
     setupAv=[...S.setupAvatars];

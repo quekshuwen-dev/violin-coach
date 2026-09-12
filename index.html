@@ -71,6 +71,7 @@
       <button class="btn btn-gray" style="flex:1" data-action="closeSettings">Cancel</button>
     </div>
     <span class="reset-link" data-action="resetAll">🗑 Reset all data</span>
+    <p class="credits">Violin sounds: <a href="https://github.com/nbrosowsky/tonejs-instruments" target="_blank" rel="noopener">tonejs-instruments</a> samples (CC BY 3.0), pitch-corrected.</p>
   </div>
 </div>
 
@@ -115,10 +116,32 @@
     <div class="card">
       <p class="ctitle">🎻 Practice Session</p>
       <div class="inp-toggle">
-        <button class="inp-tab active" data-action="switchInput" data-mode="camera">📷 Camera</button>
-        <button class="inp-tab" data-action="switchInput" data-mode="upload">📁 Upload Video</button>
+        <button class="inp-tab active" data-action="switchInput" data-mode="check">🎼 Scale Check</button>
+        <button class="inp-tab" data-action="switchInput" data-mode="camera">📷 Camera</button>
+        <button class="inp-tab" data-action="switchInput" data-mode="upload">📁 Upload</button>
       </div>
-      <div id="cam-section">
+
+      <!-- Scale Check: listen while the child plays, judge every note -->
+      <div id="check-section">
+        <div class="sc-head">
+          <div class="sc-head-txt"><p class="sc-title" id="sc-title"></p><p class="sc-sub" id="sc-sub"></p></div>
+          <button class="btn btn-gray sc-change" data-action="scChange">Change</button>
+        </div>
+        <div id="sc-bubbles" class="sc-bubbles"></div>
+        <div id="sc-live" class="sc-live hidden">
+          <div class="sc-next-row">Now play: <b id="sc-next"></b></div>
+          <div class="sc-heard" id="sc-heard"></div>
+        </div>
+        <div class="sc-btns">
+          <button class="btn btn-purple" id="sc-hear" data-action="scHear">🔊 Hear it</button>
+          <button class="btn btn-green btn-grow" id="sc-start" data-action="scStart">🎤 Start — you play!</button>
+          <button class="btn btn-red btn-grow hidden" id="sc-stop" data-action="scStop">⏹ Finished</button>
+        </div>
+        <p class="scale-hint" id="sc-hint"></p>
+        <div id="sc-result" class="sc-result hidden"></div>
+      </div>
+
+      <div id="cam-section" class="hidden">
         <div id="cam-box">
           <div id="cam-placeholder"><div class="big-emo">🎻</div><p style="font-size:0.85rem">Tap Start Camera to begin!</p></div>
           <video id="cam-video" autoplay muted playsinline class="hidden"></video>
@@ -165,11 +188,15 @@
     </div>
 
     <div class="card">
-      <div class="week-head">
-        <p class="ctitle" style="margin-bottom:0">📅 This Week</p>
-        <div class="week-total" id="week-total">⭐ 0 total</div>
+      <div class="cal-head">
+        <button class="cal-nav" data-action="calPrev" aria-label="Previous month">‹</button>
+        <p class="ctitle cal-title" id="cal-title" data-action="calToday"></p>
+        <button class="cal-nav" data-action="calNext" aria-label="Next month">›</button>
       </div>
-      <div class="week-days" id="week-days"></div>
+      <div class="cal-stats" id="cal-stats"></div>
+      <div class="cal-dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <p class="cal-legend">✓ a scale played correctly that day · ★ practice feedback</p>
     </div>
   </div>
 
@@ -177,7 +204,7 @@
   <div id="tuner-tab" class="tab-pane">
     <div class="card">
       <p class="ctitle">🎯 Violin Tuner</p>
-      <p class="card-sub">Play one string at a time. Tap a string below to hear its reference note.</p>
+      <p class="card-sub">Play one string at a time. Tap a string below to hear a real violin play it.</p>
       <div class="string-grid" id="string-grid"></div>
       <div id="tuner-display">
         <div id="tun-note">🎻</div>

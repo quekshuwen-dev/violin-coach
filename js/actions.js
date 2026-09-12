@@ -4,6 +4,7 @@
 const clickActions={},changeActions={};
 export function onAction(map){Object.assign(clickActions,map);}
 export function onChange(map){Object.assign(changeActions,map);}
+export function runAction(name,data={}){const fn=clickActions[name];if(fn)fn(data,null,null);}
 export function installDelegation(root=document){
   root.addEventListener('click',e=>{
     const el=e.target.closest('[data-action]');
