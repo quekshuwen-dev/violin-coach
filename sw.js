@@ -1,6 +1,6 @@
 // Service worker: precache the app shell so everything except AI feedback
 // works offline. Bump VERSION whenever any precached file changes.
-const VERSION='v2.2.0';
+const VERSION='v2.3.0';
 const CACHE='violin-coach-'+VERSION;
 const SHELL=[
   './','./index.html','./manifest.webmanifest','./css/app.css',
