@@ -1,0 +1,11 @@
+{
+  "name": "violin-coach",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Violin Star Coach — installable PWA: tuner, scale player, AI practice feedback",
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes serve -l 8080 .",
+    "test": "node --test tests/*.test.js"
+  }
+}
